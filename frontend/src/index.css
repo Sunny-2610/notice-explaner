@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..510&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,37 +6,99 @@
 
 @layer base {
   body {
-    @apply bg-neutral text-on-surface font-sans antialiased;
-    font-family: 'Inter Variable', Inter, system-ui, sans-serif;
+    @apply bg-bg text-text-primary antialiased;
+    font-family: 'Noto Sans', 'Inter', system-ui, sans-serif;
+  }
+  /* Devanagari needs slightly larger size for visual balance */
+  [lang='hi'],
+  [lang='mr'] {
+    font-size: 1.15em;
   }
   :focus-visible {
-    outline: 2px solid #7170FF;
+    outline: 2px solid #613AF5;
     outline-offset: 2px;
   }
 }
 
 @layer components {
+  /* 48px minimum touch targets (GIGW 3.0), calm 12px radius */
   .btn-primary {
-    @apply bg-secondary text-neutral rounded-full h-[44px] px-5 text-base font-medium;
-    font-weight: 510;
-    letter-spacing: -0.08px;
+    @apply bg-primary text-white rounded-xl min-h-[48px] px-6 py-3 font-medium active:bg-primary-hover transition-colors;
   }
   .btn-secondary {
-    @apply bg-transparent text-on-surface rounded-full h-[44px] px-5 text-base border border-border font-medium;
-    font-weight: 510;
+    @apply bg-white text-text-primary rounded-xl min-h-[48px] px-6 py-3 border-2 border-border font-medium active:bg-surface;
   }
-  .card {
-    @apply bg-surface text-on-surface rounded-lg border border-border;
-    padding: 12px 16px 16px;
+  .btn-danger {
+    @apply bg-error text-white rounded-xl min-h-[48px] px-6 py-3 font-medium active:bg-red-700 transition-colors;
   }
-  .input-dark {
-    @apply bg-muted-surface text-on-surface rounded-md border border-border;
-    padding: 12px 14px;
-  }
-  .chip {
-    @apply bg-muted-surface text-on-surface rounded-full px-2.5 py-1.5 text-xs;
+  .btn-link {
+    @apply bg-transparent text-primary p-0 underline font-medium;
   }
   .nav-link {
-    @apply bg-transparent text-text-muted text-sm;
+    @apply px-3 py-3 min-h-[48px] inline-flex items-center text-text-secondary font-medium;
   }
+  .nav-link-active {
+    @apply text-text-primary underline;
+  }
+
+  .card {
+    @apply bg-surface-elevated rounded-xl border border-border p-5;
+  }
+  .card-elevated {
+    @apply bg-surface-elevated rounded-xl shadow-sm border border-border p-6;
+  }
+
+  /* Semantic chips that carry meaning */
+  .chip-info { @apply bg-primary-light text-primary rounded-full px-3 py-1 text-xs font-medium; }
+  .chip-success { @apply bg-success-bg text-success rounded-full px-3 py-1 text-xs font-medium; }
+  .chip-warning { @apply bg-warning-bg text-warning rounded-full px-3 py-1 text-xs font-medium; }
+  .chip-error { @apply bg-error-bg text-error rounded-full px-3 py-1 text-xs font-medium; }
+
+  /* Camera hero card: large, inviting, obvious */
+  .camera-card {
+    @apply w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-gray-300 bg-surface flex flex-col items-center justify-center gap-3 active:bg-gray-100 transition-colors min-h-[48px];
+  }
+  .camera-icon { @apply text-6xl; }
+  .camera-title { @apply text-xl font-semibold text-text-primary; }
+  .camera-subtitle { @apply text-sm text-text-secondary; }
+  .camera-cta { @apply text-sm text-primary font-medium mt-2; }
+
+  /* Verdict banner: the visual loudest thing on the result screen */
+  .verdict { @apply flex gap-4 p-5 rounded-xl border-2; }
+  .verdict-danger { @apply bg-error-bg border-error-border; }
+  .verdict-safe { @apply bg-success-bg border-success-border; }
+  .verdict-emoji { @apply text-4xl; }
+  .verdict-title { @apply text-xl font-bold; }
+  .verdict-danger .verdict-title { @apply text-red-700; }
+  .verdict-safe .verdict-title { @apply text-green-700; }
+  .verdict-subtitle { @apply text-sm text-gray-700 mt-1; }
+
+  /* Explanation stepper */
+  .stepper-dots { @apply flex gap-2 justify-center; }
+  .dot { @apply h-2 w-2 rounded-full bg-gray-300; }
+  .dot-active { @apply bg-primary; }
+  .stepper-title { @apply text-lg font-semibold text-text-primary mt-2; }
+  .stepper-body { @apply text-base leading-7 text-text-primary mt-1; }
+
+  /* Processing stages */
+  .stage { @apply flex items-center gap-3 py-2 text-text-secondary; }
+  .stage-active { @apply text-text-primary font-medium; }
+  .stage-done { @apply text-success; }
+
+  /* Extracted fields */
+  .field-row { @apply flex items-center gap-3 py-3; }
+  .field-icon { @apply text-2xl; }
+  .field-label { @apply text-xs text-text-muted; }
+  .field-value { @apply text-base font-medium text-text-primary; }
+
+  /* Disclaimer: quiet but always at the bottom */
+  .disclaimer {
+    @apply bg-disclaimer-bg border border-disclaimer-border text-disclaimer-text rounded-xl p-4 text-sm;
+  }
+
+  /* Skeleton loaders */
+  .skeleton { @apply animate-pulse bg-gray-200 rounded-lg; }
+
+  /* Offline banner */
+  .offline-banner { @apply bg-warning-bg border-b border-warning-border text-warning text-sm text-center py-3 px-4; }
 }
