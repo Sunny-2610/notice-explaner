@@ -21,7 +21,9 @@ def create_app() -> FastAPI:
 
     @app.get("/health")
     def health() -> dict:
-        return {"ok": True}
+        from .api import deps as _deps
+
+        return {"ok": True, "aiMode": _deps.AI_MODE}
 
     return app
 
