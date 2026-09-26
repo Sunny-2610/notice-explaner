@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: notice-explainer-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install .
+    startCommand: PYTHONPATH=src uvicorn notice_explainer.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: USE_FAKE_AI
+        value: "true"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: BHASHINI_API_KEY
+        sync: false
