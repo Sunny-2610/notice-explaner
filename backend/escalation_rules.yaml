@@ -1,0 +1,22 @@
+# escalation_rules.yaml — versioned, hot-reloadable (LLD §2.5.1).
+# Deployed WITHOUT an app redeploy; every evaluation records `version` in the audit log.
+# Design constraint: ANY match sets escalate=true regardless of severity.
+# Severity is triage-only for reviewers, never suppresses escalation.
+version: 3
+rules:
+  - id: R-001
+    pattern: '\bsummons\b'
+    severity: high
+    description: 'Court summons reference'
+  - id: R-002
+    pattern: '\barrest\b|\bwarrant\b'
+    severity: high
+    description: 'Arrest or warrant reference'
+  - id: R-003
+    pattern: '\brecovery\b|\bauction\b|\bseizure\b'
+    severity: high
+    description: 'Asset recovery or seizure action'
+  - id: R-004
+    pattern: '\bcourt\b'
+    severity: medium
+    description: 'General court reference'
