@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ReviewQueue from './components/ReviewQueue';
+import VoicePlayer from './components/VoicePlayer';
 import { submitDocument } from './lib/api';
 import { useJobPoll } from './hooks/useJobPoll';
 import { STRINGS, type Lang } from './i18n/strings';
@@ -111,6 +112,9 @@ export default function App() {
             <article className="p-4 rounded-xl border text-lg leading-relaxed">
               {result.explanation}
             </article>
+          )}
+          {result.status === 'completed' && (
+            <VoicePlayer jobId={result.jobId} lang={lang} />
           )}
           <footer className="text-sm text-gray-600">{t.disclaimer}</footer>
         </section>

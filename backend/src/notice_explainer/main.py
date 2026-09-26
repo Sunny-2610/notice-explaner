@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .api.audit import router as audit_router
 from .api.documents import router as documents_router
 from .api.review import router as review_router
+from .api.voice import router as voice_router
 
 
 def create_app() -> FastAPI:
@@ -19,6 +20,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(documents_router)
     app.include_router(audit_router)
+    app.include_router(voice_router)
     app.include_router(review_router)
 
     @app.get("/health")
