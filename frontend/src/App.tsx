@@ -7,6 +7,7 @@ import VoiceRecorder from './components/VoiceRecorder';
 import LiveCamera from './components/LiveCamera';
 import VerdictBanner from './components/VerdictBanner';
 import ProgressiveExplanation from './components/ProgressiveExplanation';
+import FollowUpQA from './components/FollowUpQA';
 import FieldRow from './components/FieldRow';
 import ProcessingStages from './components/ProcessingStages';
 import { submitDocument } from './lib/api';
@@ -191,6 +192,7 @@ export default function App() {
                     {result.explanation && (
                       <ProgressiveExplanation text={result.explanation} lang={lang} />
                     )}
+                    {result.explanation && <FollowUpQA jobId={result.jobId} lang={lang} />}
                     {(result.fields?.issuingAuthority ||
                       result.fields?.deadlineDate ||
                       result.fields?.amountOwed != null) && (

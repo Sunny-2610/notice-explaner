@@ -4,9 +4,10 @@ from __future__ import annotations
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
 
 from ..application.use_cases.process_job import process_job
+from ..application.use_cases.answer_question import answer_question, AnswerQuestionError
 from ..application.use_cases.submit_document import ValidationError, submit_document
 from . import deps
-from .schemas import DocumentResult, SubmitResponse
+from .schemas import AskRequest, AskResponse, DocumentResult, SubmitResponse
 
 router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
 
@@ -50,3 +51,24 @@ def get_result(job_id: str) -> DocumentResult:
     if result is None:
         raise HTTPException(status_code=404, detail="unknown jobId")
     return DocumentResult(**result)
+
+
+@router.post("/{job_id}/ask", response_model=AskResponse)
+def ask(job_id: str, body: AskRequest) -> AskResponse:
+    """Follow-up Q&A about a processed notice (ADR 0003).
+
+    Sandboxed agent: read-only tools, disclaimer always appended.
+    Escalation state is never read or modified here.
+    """
+    try:
+        answer = answer_question(
+            job_id, body.question,
+            job_store=deps.job_store,
+            qa_agent=deps.qa_agent,
+            audit=deps.audit,
+        )
+    except AnswerQuestionError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code.value, "message": exc.message})
+    return AskResponse(jobId=job_id, question=body.question, answer=answer)

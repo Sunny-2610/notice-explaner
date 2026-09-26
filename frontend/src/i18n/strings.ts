@@ -44,6 +44,9 @@ export const STRINGS = {
     howTitle: 'यह कैसे काम करता है',
     faqTitle: 'अक्सर पूछे जाने वाले सवाल',
     reviewer: 'समीक्षक लॉगिन',
+    askTitle: 'कोई सवाल है?',
+    askPlaceholder: 'जैसे: अगर मैं नजरअंदाज कर दूं तो क्या होगा?',
+    askButton: 'पूछें',
   },
   mr: {
     title: 'योजना मित्र — नोटीस समजावून सांगा',
@@ -90,6 +93,9 @@ export const STRINGS = {
     howTitle: 'हे कसे काम करते',
     faqTitle: 'वारंवार विचारले जाणारे प्रश्न',
     reviewer: 'समीक्षक लॉगिन',
+    askTitle: 'काही प्रश्न आहे का?',
+    askPlaceholder: 'उदा: दुर्लक्ष केल्यास काय होईल?',
+    askButton: 'विचारा',
   },
 } as const;
 

@@ -79,3 +79,14 @@ if os.getenv("BHASHINI_API_KEY") and not USE_FAKE:
 else:
     voice_service = FakeVoiceService()
 escalation_eval = YamlEscalationEvaluator()
+
+# Q&A agent — lazy shape, only used when POST /{job_id}/ask is called.
+# Fake (deterministic, no API) unless a real Gemini key is configured.
+if USE_FAKE or not os.getenv("GEMINI_API_KEY"):
+    from ..infrastructure.fake_ai import FakeQAAgent
+
+    qa_agent = FakeQAAgent()
+else:
+    from ..infrastructure.qa_agent import QAAgent
+
+    qa_agent = QAAgent()

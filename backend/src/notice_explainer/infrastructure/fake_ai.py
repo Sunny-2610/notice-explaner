@@ -110,3 +110,15 @@ class FakeVoiceService:
 
     def text_to_speech(self, text: str, lang: str) -> bytes:
         return b""
+
+
+class FakeQAAgent:
+    """Deterministic Q&A agent for tests — no API calls."""
+
+    def answer(self, notice_text, explanation, target_language, question) -> str:
+        from .agent_tools import DISCLAIMERS, REFUSALS, is_out_of_scope
+
+        disclaimer = DISCLAIMERS.get(target_language, DISCLAIMERS["en"])
+        if is_out_of_scope(question):
+            return f"{REFUSALS.get(target_language, REFUSALS['en'])}\n\n{disclaimer}"
+        return f"[FakeQAAgent] {question}\n\n{disclaimer}"

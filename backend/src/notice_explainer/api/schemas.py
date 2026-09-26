@@ -42,3 +42,14 @@ class ReviewItem(BaseModel):
     routedReason: str
     reviewerId: str | None = None
     decision: str | None = None
+
+
+class AskRequest(BaseModel):
+    question: str
+
+
+class AskResponse(BaseModel):
+    jobId: str
+    question: str
+    answer: str
+    disclaimerIncluded: bool = True
