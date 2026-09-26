@@ -36,6 +36,11 @@ async def submit(
     except ValidationError as exc:
         raise HTTPException(status_code=400, detail={"code": exc.code.value, "message": exc.message})
     background.add_task(_run, job.job_id)
+    if deps.job_queue is not None:
+        try:
+            deps.job_queue.enqueue(job.job_id)
+        except Exception:
+            pass  # BackgroundTasks _run already scheduled inline
     return SubmitResponse(jobId=job.job_id, status="queued")
 
 

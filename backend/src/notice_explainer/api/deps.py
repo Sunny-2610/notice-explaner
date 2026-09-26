@@ -28,7 +28,30 @@ from ..infrastructure.memory import (
 job_store = MemoryJobStore()
 image_store = MemoryImageStore()
 review_queue = MemoryReviewQueue()
-audit = MemoryAuditLogger()
+
+# Optional Postgres audit (compose sets DATABASE_URL); memory otherwise.
+try:
+    if os.getenv("DATABASE_URL"):
+        from ..infrastructure.postgres import PostgresAuditLogger
+
+        audit = PostgresAuditLogger()  # type: ignore[assignment]
+    else:
+        raise RuntimeError("DATABASE_URL unset — memory audit")
+except Exception as exc:
+    print(f"deps: memory audit fallback ({exc})")
+    audit = MemoryAuditLogger()
+
+# Optional Redis job queue; None -> FastAPI BackgroundTasks inline run.
+try:
+    if os.getenv("REDIS_URL"):
+        from ..infrastructure.redis_queue import RedisJobQueue
+
+        job_queue: RedisJobQueue | None = RedisJobQueue()
+    else:
+        job_queue = None
+except Exception as exc:
+    print(f"deps: inline job run fallback ({exc})")
+    job_queue = None
 
 USE_FAKE = os.getenv("USE_FAKE_AI", "true").lower() in ("1", "true", "yes")
 AI_MODE = "fake"
