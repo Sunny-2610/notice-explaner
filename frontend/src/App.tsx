@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import ReviewQueue from './components/ReviewQueue';
+import HowItWorks from './components/HowItWorks';
+import Faq from './components/Faq';
 import VoicePlayer from './components/VoicePlayer';
 import { submitDocument } from './lib/api';
 import { useJobPoll } from './hooks/useJobPoll';
 import { STRINGS, type Lang } from './i18n/strings';
 
+type Tab = 'explain' | 'how' | 'faq' | 'review';
+
 export default function App() {
-  const [tab, setTab] = useState<'explain' | 'review'>('explain');
+  const [tab, setTab] = useState<Tab>('explain');
   const [lang, setLang] = useState<Lang>('hi');
   const [file, setFile] = useState<File | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
@@ -42,18 +46,22 @@ export default function App() {
             <span className="chip ml-2 hidden sm:inline-block">Notice Explainer</span>
           </div>
           <nav className="flex gap-6">
-            <button
-              onClick={() => setTab('explain')}
-              className={`nav-link hover:text-on-surface ${tab === 'explain' ? 'text-on-surface' : ''}`}
-            >
-              Explain
-            </button>
-            <button
-              onClick={() => setTab('review')}
-              className={`nav-link hover:text-on-surface ${tab === 'review' ? 'text-on-surface' : ''}`}
-            >
-              Review
-            </button>
+            {(
+              [
+                ['explain', 'Explain'],
+                ['how', lang === 'mr' ? 'कसे काम करते' : 'कैसे काम करता है'],
+                ['faq', 'FAQ'],
+                ['review', 'Review'],
+              ] as [Tab, string][]
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                className={`nav-link hover:text-on-surface ${tab === key ? 'text-on-surface' : ''}`}
+              >
+                {label}
+              </button>
+            ))}
           </nav>
         </div>
       </header>
@@ -61,6 +69,10 @@ export default function App() {
       <main className="mx-auto max-w-5xl px-6 pb-16">
         {tab === 'review' ? (
           <ReviewQueue />
+        ) : tab === 'how' ? (
+          <HowItWorks lang={lang} />
+        ) : tab === 'faq' ? (
+          <Faq lang={lang} />
         ) : (
           <>
             {/* Hero — wide, centered, breathing room above the fold */}
