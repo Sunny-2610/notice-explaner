@@ -19,12 +19,12 @@ export default function VoicePlayer({ jobId, lang }: { jobId: string; lang: stri
   if (state === 'unavailable') return null;
 
   return (
-    <div>
+    <div className="card">
       {!url ? (
         <button
           onClick={load}
           disabled={state === 'loading'}
-          className="min-h-[52px] px-6 rounded-xl bg-green-700 text-white text-lg disabled:opacity-50"
+          className="h-[44px] px-5 rounded-full bg-secondary text-neutral text-[15px] font-medium disabled:opacity-50"
         >
           {state === 'loading' ? '…' : '🔊 सुनें / ऐका'}
         </button>

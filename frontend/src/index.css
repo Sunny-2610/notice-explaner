@@ -1,3 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..510&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-neutral text-on-surface font-sans antialiased;
+    font-family: 'Inter Variable', Inter, system-ui, sans-serif;
+  }
+  :focus-visible {
+    outline: 2px solid #7170FF;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-secondary text-neutral rounded-full h-[44px] px-5 text-base font-medium;
+    font-weight: 510;
+    letter-spacing: -0.08px;
+  }
+  .btn-secondary {
+    @apply bg-transparent text-on-surface rounded-full h-[44px] px-5 text-base border border-border font-medium;
+    font-weight: 510;
+  }
+  .card {
+    @apply bg-surface text-on-surface rounded-lg border border-border;
+    padding: 12px 16px 16px;
+  }
+  .input-dark {
+    @apply bg-muted-surface text-on-surface rounded-md border border-border;
+    padding: 12px 14px;
+  }
+  .chip {
+    @apply bg-muted-surface text-on-surface rounded-full px-2.5 py-1.5 text-xs;
+  }
+  .nav-link {
+    @apply bg-transparent text-text-muted text-sm;
+  }
+}

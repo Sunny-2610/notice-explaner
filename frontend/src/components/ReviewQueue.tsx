@@ -42,51 +42,61 @@ export default function ReviewQueue() {
   };
 
   return (
-    <section className="mt-6 space-y-4">
+    <section className="pt-16 space-y-4 max-w-2xl mx-auto">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Review queue ({items.length})</h2>
-        <button onClick={refresh} className="min-h-[48px] px-4 rounded-lg bg-gray-200">
+        <h2 className="text-[22px] leading-7 font-medium tracking-[0px]">
+          Review queue <span className="chip ml-2">{items.length}</span>
+        </h2>
+        <button onClick={refresh} className="h-[44px] px-5 rounded-full border border-border text-[15px]">
           Refresh
         </button>
       </div>
-      {error && <p className="text-red-700">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
       <ul className="space-y-2">
         {items.map((i) => (
           <li key={i.jobId}>
             <button
               onClick={() => open(i.jobId)}
-              className={`w-full text-left p-3 rounded-xl border min-h-[48px] ${
-                selected === i.jobId ? 'border-black' : ''
+              className={`card w-full text-left min-h-[48px] hover:border-text-muted ${
+                selected === i.jobId ? 'border-primary' : ''
               }`}
             >
               <span className="font-mono text-sm">{i.jobId}</span>
-              <span className="ml-2 text-sm text-gray-600">{i.routedReason}</span>
+              <span className="ml-2 text-sm text-text-muted">{i.routedReason}</span>
             </button>
           </li>
         ))}
       </ul>
       {result && (
-        <div className="space-y-3 p-4 rounded-xl bg-gray-50">
-          <p className="text-sm">Status: {result.status} | Type: {result.documentType}</p>
-          {result.explanation && <p className="text-lg">{result.explanation}</p>}
-          <details>
-            <summary className="cursor-pointer font-medium">
+        <div className="card space-y-3">
+          <p className="text-sm text-text-muted">
+            Status: {result.status} | Type: {result.documentType}
+          </p>
+          {result.explanation && <p className="text-[15px] leading-6">{result.explanation}</p>}
+          <details className="border-t border-border pt-3">
+            <summary className="cursor-pointer font-medium text-[15px]">
               Audit trail ({audit.length} stages)
             </summary>
             <ul className="mt-2 space-y-1 text-sm font-mono">
               {audit.map((a, idx) => (
-                <li key={idx} className="p-2 bg-white rounded border">
+                <li key={idx} className="p-2 bg-muted-surface rounded-md border border-border">
                   {a.stage}: {JSON.stringify(a.output)?.slice(0, 200)}
                 </li>
               ))}
             </ul>
           </details>
           <div className="flex gap-2">
-            {(['approve', 'edit', 'reject'] as const).map((d) => (
+            <button
+              onClick={() => decide('approve')}
+              className="flex-1 h-[44px] rounded-full bg-secondary text-neutral capitalize text-[15px] font-medium"
+            >
+              Approve
+            </button>
+            {(['edit', 'reject'] as const).map((d) => (
               <button
                 key={d}
                 onClick={() => decide(d)}
-                className="flex-1 min-h-[52px] rounded-xl bg-black text-white capitalize"
+                className="flex-1 h-[44px] rounded-full border border-border capitalize text-[15px]"
               >
                 {d}
               </button>
