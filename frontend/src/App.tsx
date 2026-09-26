@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import ReviewQueue from './components/ReviewQueue';
 import { submitDocument } from './lib/api';
 import { useJobPoll } from './hooks/useJobPoll';
 import { STRINGS, type Lang } from './i18n/strings';
 
 export default function App() {
+  const [tab, setTab] = useState<'explain' | 'review'>('explain');
   const [lang, setLang] = useState<Lang>('hi');
   const [file, setFile] = useState<File | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
@@ -30,7 +32,24 @@ export default function App() {
   return (
     <main className="mx-auto max-w-xl min-h-screen p-4 pb-16">
       <h1 className="text-2xl font-bold mb-4">{t.title}</h1>
-
+      <nav className="flex gap-2 mb-4">
+        <button
+          onClick={() => setTab('explain')}
+          className={`min-h-[48px] px-6 rounded-lg ${tab === 'explain' ? 'bg-black text-white' : 'bg-gray-200'}`}
+        >
+          Explain
+        </button>
+        <button
+          onClick={() => setTab('review')}
+          className={`min-h-[48px] px-6 rounded-lg ${tab === 'review' ? 'bg-black text-white' : 'bg-gray-200'}`}
+        >
+          Review
+        </button>
+      </nav>
+      {tab === 'review' ? (
+        <ReviewQueue />
+      ) : (
+      <>
       <label className="block mb-2 font-medium">{t.language}</label>
       <div className="flex gap-2 mb-4">
         {(['hi', 'mr'] as Lang[]).map((l) => (
@@ -95,6 +114,8 @@ export default function App() {
           )}
           <footer className="text-sm text-gray-600">{t.disclaimer}</footer>
         </section>
+      )}
+      </>
       )}
     </main>
   );
