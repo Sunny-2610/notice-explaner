@@ -20,11 +20,12 @@ export default function App() {
     setBusy(true);
     setSubmitError(null);
     try {
-      if (file.size > 10 * 1024 * 1024) throw new Error('Image must be 10MB or smaller.');
+      if (file.size > 10 * 1024 * 1024) throw new Error(t.badFile);
+      if (!['image/jpeg', 'image/png'].includes(file.type)) throw new Error(t.badFile);
       const r = await submitDocument(file, lang);
       setJobId(r.jobId);
-    } catch (e) {
-      setSubmitError((e as Error).message);
+    } catch {
+      setSubmitError(t.badFile);
     } finally {
       setBusy(false);
     }
@@ -98,6 +99,9 @@ export default function App() {
           )}
           {result.status === 'awaiting_review' && result.errorCode !== 'E-201' && (
             <div className="p-4 rounded-xl bg-yellow-100">{t.underReview}</div>
+          )}
+          {result.status === 'failed' && (
+            <div className="p-4 rounded-xl bg-red-50">{t.failed}</div>
           )}
           {result.fields?.issuingAuthority && (
             <dl className="p-4 rounded-xl bg-gray-100 space-y-1">
