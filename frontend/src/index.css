@@ -63,15 +63,39 @@
   .camera-subtitle { @apply text-sm text-text-secondary; }
   .camera-cta { @apply text-sm text-primary font-medium mt-2; }
 
-  /* Verdict banner: the visual loudest thing on the result screen */
-  .verdict { @apply flex gap-4 p-5 rounded-xl border-2; }
-  .verdict-danger { @apply bg-error-bg border-error-border; }
-  .verdict-safe { @apply bg-success-bg border-success-border; }
-  .verdict-emoji { @apply text-4xl; }
+  /* Verdict banner: the visual loudest thing on the result screen.
+     Danger and safe are deliberately NOT mirrors: danger gets a heavy
+     accent bar + filled icon medallion; safe stays quiet (thin border,
+     outline icon, no accent bar). */
+  .verdict { @apply flex gap-4 p-5 rounded-xl; }
+  .verdict-danger {
+    @apply bg-escalate-bg border-2 border-escalate-border rounded-xl;
+    border-left-width: 4px;
+    border-left-color: #7F1D1D;
+  }
+  .verdict-safe {
+    @apply bg-success-bg border-success-border rounded-xl;
+    border-width: 1px;
+  }
+  .verdict-icon-danger {
+    @apply shrink-0 flex items-center justify-center rounded-full text-white;
+    background-color: #7F1D1D;
+    width: 48px;
+    height: 48px;
+  }
+  .verdict-icon-safe { @apply shrink-0 text-success; }
+  .verdict-lawyer-chip {
+    @apply inline-block rounded-full bg-white px-3 py-1 text-xs font-semibold;
+    color: #7F1D1D;
+    border: 1px solid #7F1D1D;
+  }
   .verdict-title { @apply text-xl font-bold; }
   .verdict-danger .verdict-title { @apply text-red-700; }
   .verdict-safe .verdict-title { @apply text-green-700; }
   .verdict-subtitle { @apply text-sm text-gray-700 mt-1; }
+
+  /* AI-disclosure line: low visual weight, no card/border */
+  .ai-disclosure { @apply text-sm text-text-secondary mt-3; }
 
   /* Explanation stepper */
   .stepper-dots { @apply flex gap-2 justify-center; }
@@ -87,13 +111,30 @@
 
   /* Extracted fields */
   .field-row { @apply flex items-center gap-3 py-3; }
-  .field-icon { @apply text-2xl; }
+  .field-icon { @apply text-text-secondary shrink-0 flex items-center; }
   .field-label { @apply text-xs text-text-muted; }
   .field-value { @apply text-base font-medium text-text-primary; }
+  /* Confidence trust signal: always-visible filled circle, never emoji */
+  .conf-dot { @apply inline-block rounded-full shrink-0; width: 12px; height: 12px; }
+  .conf-dot-high { background-color: #16A34A; }
+  .conf-dot-medium { background-color: #EA580C; }
+  .conf-dot-low { background-color: #DC2626; }
+  .conf-sentence { @apply pb-3 pl-11 text-sm text-text-secondary; }
 
   /* Disclaimer: quiet but always at the bottom */
   .disclaimer {
     @apply bg-disclaimer-bg border border-disclaimer-border text-disclaimer-text rounded-xl p-4 text-sm;
+  }
+  /* Sticky once a job exists — never hidden behind a scroll */
+  .disclaimer-sticky {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+
+  /* Voice CTA as a true peer of the camera CTA (equal visual mass) */
+  .voice-peer-card {
+    @apply w-full rounded-2xl border-2 border-border bg-surface flex flex-col items-center justify-center gap-3 p-6 min-h-[48px];
   }
 
   /* Skeleton loaders */

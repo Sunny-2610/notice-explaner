@@ -1,11 +1,12 @@
+import { BookOpen, Check, Circle, ClipboardList, Loader2, MessagesSquare, ShieldCheck, Tag } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
 const STAGES = [
-  { key: 'extracting', icon: '📖' },
-  { key: 'classifying', icon: '🏷️' },
-  { key: 'extracting_fields', icon: '📝' },
-  { key: 'generating_explanation', icon: '💬' },
-  { key: 'checking_escalation', icon: '🛡️' },
+  { key: 'extracting', Icon: BookOpen },
+  { key: 'classifying', Icon: Tag },
+  { key: 'extracting_fields', Icon: ClipboardList },
+  { key: 'generating_explanation', Icon: MessagesSquare },
+  { key: 'checking_escalation', Icon: ShieldCheck },
 ] as const;
 
 const LABEL: Record<Lang, Record<string, string>> = {
@@ -34,19 +35,23 @@ export default function ProcessingStages({ status, lang }: { status: string; lan
       <p className="text-sm font-medium text-text-secondary mb-1">{STRINGS[lang].processing}</p>
       {STAGES.map((stage, i) => {
         const stageIndex = i + 1;
-        const cls =
-          stageIndex < currentIndex || currentIndex >= order.length
-            ? 'stage stage-done'
-            : stageIndex === currentIndex
-              ? 'stage stage-active'
-              : 'stage';
+        const done = stageIndex < currentIndex || currentIndex >= order.length;
+        const active = !done && stageIndex === currentIndex;
+        const cls = done ? 'stage stage-done' : active ? 'stage stage-active' : 'stage';
+        const { Icon } = stage;
         return (
           <div key={stage.key} className={cls}>
             <span aria-hidden>
-              {stageIndex < currentIndex ? '✅' : stageIndex === currentIndex ? '⏳' : '⏸️'}
+              {done ? (
+                <Check size={20} strokeWidth={1.75} />
+              ) : active ? (
+                <Loader2 size={20} strokeWidth={1.75} className="animate-spin" />
+              ) : (
+                <Circle size={20} strokeWidth={1.75} />
+              )}
             </span>
-            <span>
-              {stage.icon} {LABEL[lang][stage.key]}
+            <span className="inline-flex items-center gap-2">
+              <Icon size={20} strokeWidth={1.75} aria-hidden /> {LABEL[lang][stage.key]}
             </span>
           </div>
         );

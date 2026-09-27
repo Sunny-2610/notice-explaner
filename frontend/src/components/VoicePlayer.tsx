@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { Volume2 } from 'lucide-react';
+import { STRINGS, type Lang } from '../i18n/strings';
 import { fetchSpeech } from '../lib/voice';
 
-export default function VoicePlayer({ jobId, lang }: { jobId: string; lang: string }) {
+export default function VoicePlayer({ jobId, lang }: { jobId: string; lang: Lang }) {
+  const t = STRINGS[lang];
   const [url, setUrl] = useState<string | null>(null);
   const [state, setState] = useState<'idle' | 'loading' | 'unavailable'>('idle');
 
@@ -24,9 +27,10 @@ export default function VoicePlayer({ jobId, lang }: { jobId: string; lang: stri
         <button
           onClick={load}
           disabled={state === 'loading'}
-          className="h-[44px] px-5 rounded-full bg-secondary text-neutral text-[15px] font-medium disabled:opacity-50"
+          className="btn-secondary inline-flex items-center gap-2 disabled:opacity-50"
         >
-          {state === 'loading' ? '…' : '🔊 सुनें / ऐका'}
+          <Volume2 size={20} strokeWidth={1.75} aria-hidden />
+          {state === 'loading' ? '…' : t.listen}
         </button>
       ) : (
         <audio controls src={url} className="w-full" />

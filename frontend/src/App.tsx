@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Banknote, BookOpen, CalendarDays, Camera, CheckCircle2, Landmark } from 'lucide-react';
 import ReviewQueue from './components/ReviewQueue';
 import HowItWorks from './components/HowItWorks';
 import Faq from './components/Faq';
@@ -17,9 +18,21 @@ import { STRINGS, type Lang } from './i18n/strings';
 
 type Tab = 'explain' | 'how' | 'faq' | 'review';
 
+function initialLang(): Lang {
+  try {
+    const saved = localStorage.getItem('ym_lang');
+    if (saved === 'hi' || saved === 'mr') return saved;
+  } catch {
+    /* storage unavailable — fall through to navigator default */
+  }
+  if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('mr'))
+    return 'mr';
+  return 'hi';
+}
+
 export default function App() {
   const [tab, setTab] = useState<Tab>('explain');
-  const [lang, setLang] = useState<Lang>('hi');
+  const [lang, setLang] = useState<Lang>(initialLang);
   const [file, setFile] = useState<File | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -28,7 +41,16 @@ export default function App() {
   const [online, setOnline] = useState(navigator.onLine);
   const fileRef = useRef<HTMLInputElement>(null);
   const t = STRINGS[lang];
-  const { result, error: pollError } = useJobPoll(jobId);
+  const { result, error: pollError, timedOut, retry: repoll } = useJobPoll(jobId);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ym_lang', lang);
+    } catch {
+      /* storage unavailable — language just won't persist */
+    }
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   useEffect(() => {
     const go = () => setOnline(navigator.onLine);
@@ -106,34 +128,39 @@ export default function App() {
               <p className="mt-1 text-sm text-text-secondary">{t.heroSub}</p>
             </section>
 
-            {showCamera ? (
-              <LiveCamera
-                lang={lang}
-                onCapture={(f) => {
-                  setShowCamera(false);
-                  submitFile(f);
-                }}
-                onFallback={() => {
-                  setShowCamera(false);
-                  fileRef.current?.click();
-                }}
-                onClose={() => setShowCamera(false)}
-              />
-            ) : (
-              <button
-                onClick={() => setShowCamera(true)}
-                className="camera-card"
-                aria-label={t.cameraTitle}
-                disabled={busy}
-              >
-                <div className="camera-icon" aria-hidden>
-                  📷
-                </div>
-                <h3 className="camera-title">{t.cameraTitle}</h3>
-                <p className="camera-subtitle">{t.cameraSub}</p>
-                <span className="camera-cta">{t.cameraCta}</span>
-              </button>
-            )}
+            {/* Camera and voice are equal-weight peers — no "or" divider demoting voice */}
+            <div className="grid gap-3">
+              {showCamera ? (
+                <LiveCamera
+                  lang={lang}
+                  onCapture={(f) => {
+                    setShowCamera(false);
+                    submitFile(f);
+                  }}
+                  onFallback={() => {
+                    setShowCamera(false);
+                    fileRef.current?.click();
+                  }}
+                  onClose={() => setShowCamera(false)}
+                />
+              ) : (
+                <button
+                  onClick={() => setShowCamera(true)}
+                  className="camera-card"
+                  aria-label={t.cameraTitle}
+                  disabled={busy}
+                >
+                  <div className="camera-icon text-text-secondary" aria-hidden>
+                    <Camera size={56} strokeWidth={1.5} />
+                  </div>
+                  <h3 className="camera-title">{t.cameraTitle}</h3>
+                  <p className="camera-subtitle">{t.cameraSub}</p>
+                  <span className="camera-cta">{t.cameraCta}</span>
+                </button>
+              )}
+
+              <VoiceRecorder jobId={jobId} lang={lang} />
+            </div>
 
             <input
               ref={fileRef}
@@ -156,18 +183,18 @@ export default function App() {
               </div>
             )}
 
-            <div className="flex items-center gap-3 my-4" aria-hidden>
-              <span className="flex-1 border-t border-border" />
-              <span className="text-sm text-text-muted">{t.or}</span>
-              <span className="flex-1 border-t border-border" />
-            </div>
-
-            <VoiceRecorder jobId={jobId} lang={lang} />
-
             {/* Processing / result */}
-            {jobId && !terminal && !pollError && (
+            {jobId && !terminal && !pollError && !timedOut && (
               <div className="mt-4">
                 <ProcessingStages status={result?.status ?? 'queued'} lang={lang} />
+              </div>
+            )}
+            {jobId && timedOut && !terminal && (
+              <div className="card mt-4 text-center space-y-3">
+                <p className="text-base">{t.slowJob}</p>
+                <button onClick={repoll} className="btn-secondary w-full">
+                  {t.retry}
+                </button>
               </div>
             )}
             {jobId && !terminal && !result && (
@@ -189,11 +216,14 @@ export default function App() {
               <section className="mt-4 space-y-4">
                 {result.status === 'completed' && (
                   <>
+                    {/* Screen-order contract (design v2 §1): verdict → AI
+                        disclosure → stepper → key facts → Q&A → voice →
+                        collapsed details. Keep this order when adding new. */}
                     <VerdictBanner escalated={result.escalation.flagged} lang={lang} />
+                    <p className="ai-disclosure">{t.aiDisclosureLine}</p>
                     {result.explanation && (
                       <ProgressiveExplanation text={result.explanation} lang={lang} />
                     )}
-                    {result.explanation && <FollowUpQA jobId={result.jobId} lang={lang} />}
                     {(result.fields?.issuingAuthority ||
                       result.fields?.deadlineDate ||
                       result.fields?.amountOwed != null) && (
@@ -201,42 +231,56 @@ export default function App() {
                         <h3 className="text-base font-semibold mb-1">{t.keyFacts}</h3>
                         {result.fields.issuingAuthority && (
                           <FieldRow
-                            icon="🏛️"
+                            icon={<Landmark size={20} strokeWidth={1.75} aria-hidden />}
                             label="Authority"
                             value={result.fields.issuingAuthority}
                             confidence={result.classificationConfidence}
+                            lang={lang}
                           />
                         )}
                         {result.fields.deadlineDate && (
                           <FieldRow
-                            icon="📅"
+                            icon={<CalendarDays size={20} strokeWidth={1.75} aria-hidden />}
                             label="Deadline"
                             value={formatDate(result.fields.deadlineDate, lang)}
                             confidence={result.classificationConfidence}
+                            lang={lang}
                           />
                         )}
                         {result.fields.amountOwed != null && (
                           <FieldRow
-                            icon="💰"
+                            icon={<Banknote size={20} strokeWidth={1.75} aria-hidden />}
                             label="Amount"
                             value={formatCurrency(result.fields.amountOwed)}
                             confidence={result.classificationConfidence}
+                            lang={lang}
                           />
                         )}
                       </div>
                     )}
+                    {result.explanation && <FollowUpQA jobId={result.jobId} lang={lang} />}
+                    <VoicePlayer jobId={result.jobId} lang={lang} />
                     {(result.fields?.citedSection || result.fields?.requiredAction) && (
                       <details className="card">
                         <summary className="cursor-pointer font-medium min-h-[48px] inline-flex items-center">
                           {t.details}
                         </summary>
                         <div className="mt-2 space-y-1 text-base">
-                          {result.fields.citedSection && <p>📖 {result.fields.citedSection}</p>}
-                          {result.fields.requiredAction && <p>✅ {result.fields.requiredAction}</p>}
+                          {result.fields.citedSection && (
+                            <p className="inline-flex items-center gap-2">
+                              <BookOpen size={20} strokeWidth={1.75} aria-hidden />{' '}
+                              {result.fields.citedSection}
+                            </p>
+                          )}
+                          {result.fields.requiredAction && (
+                            <p className="inline-flex items-center gap-2">
+                              <CheckCircle2 size={20} strokeWidth={1.75} aria-hidden />{' '}
+                              {result.fields.requiredAction}
+                            </p>
+                          )}
                         </div>
                       </details>
                     )}
-                    <VoicePlayer jobId={result.jobId} lang={lang} />
                   </>
                 )}
                 {result.status === 'awaiting_review' && result.errorCode === 'E-201' && (
@@ -265,8 +309,11 @@ export default function App() {
               </section>
             )}
 
-            {/* Disclaimer: quiet, always visible */}
-            <div className="disclaimer mt-6">{t.disclaimer}</div>
+            {/* Disclaimer: quiet, always visible — sticky once a job exists
+                so it's never hidden behind a scroll (design v2 §2) */}
+            <div className={jobId ? 'disclaimer disclaimer-sticky mt-6' : 'disclaimer mt-6'}>
+              {t.disclaimer}
+            </div>
           </>
         )}
       </main>

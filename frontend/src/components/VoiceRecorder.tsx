@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { MessageCircle, Mic, Square } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 import { queryVoice } from '../lib/voice';
 
@@ -92,8 +93,10 @@ export default function VoiceRecorder({ jobId, lang }: { jobId: string | null; l
   );
 
   return (
-    <div className="card text-center">
-      <p className="text-base font-semibold text-text-primary">🎤 {t.voiceTitle}</p>
+    <div className="voice-peer-card text-center">
+      <p className="text-base font-semibold text-text-primary inline-flex items-center gap-2">
+        <Mic size={20} strokeWidth={1.75} aria-hidden /> {t.voiceTitle}
+      </p>
       {recording ? (
         <div className="mt-3 space-y-3">
           <div className="flex items-end justify-center gap-1 h-12" aria-hidden>
@@ -104,8 +107,8 @@ export default function VoiceRecorder({ jobId, lang }: { jobId: string | null; l
           <p className="text-sm text-text-secondary tabular-nums">
             00:{seconds.toString().padStart(2, '0')}
           </p>
-          <button onClick={stop} className="btn-danger w-full">
-            {t.voiceStop}
+          <button onClick={stop} className="btn-danger w-full inline-flex items-center justify-center gap-2">
+            <Square size={18} strokeWidth={1.75} aria-hidden /> {t.voiceStop}
           </button>
         </div>
       ) : (
@@ -121,14 +124,17 @@ export default function VoiceRecorder({ jobId, lang }: { jobId: string | null; l
             }
           }}
           style={{ touchAction: 'none' }}
-          className="btn-secondary w-full mt-3"
+          className="btn-primary w-full mt-3 inline-flex items-center justify-center gap-2"
         >
-          {t.voiceHold}
+          <Mic size={20} strokeWidth={1.75} aria-hidden /> {t.voiceHold}
         </button>
       )}
       {!jobId && !recording && <p className="mt-2 text-xs text-text-muted">{t.voiceFirst}</p>}
       {transcription ? (
-        <p className="mt-3 text-sm text-text-primary">💬 “{transcription}”</p>
+        <p className="mt-3 text-sm text-text-primary inline-flex items-start gap-1">
+          <MessageCircle size={16} strokeWidth={1.75} aria-hidden className="mt-0.5 shrink-0" />“
+          {transcription}”
+        </p>
       ) : (
         unavailable && <p className="mt-3 text-sm text-text-secondary">{t.textOnly}</p>
       )}

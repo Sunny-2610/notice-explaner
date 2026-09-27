@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { AlertTriangle, CalendarClock, FileText } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
 /** Split a wall of explanation text into ~3 chronological beats. */
@@ -12,7 +13,7 @@ function toBeats(text: string): string[] {
   return [0, 1, 2].map((i) => parts.slice(i * size, (i + 1) * size).join(' ')).filter(Boolean);
 }
 
-const ICONS = ['📄', '📅', '⚠️'];
+const ICONS = [FileText, CalendarClock, AlertTriangle];
 
 export default function ProgressiveExplanation({ text, lang }: { text: string; lang: Lang }) {
   const t = STRINGS[lang];
@@ -29,9 +30,14 @@ export default function ProgressiveExplanation({ text, lang }: { text: string; l
         ))}
       </div>
       <div className="mt-4">
-        <span className="text-4xl" aria-hidden>
-          {ICONS[Math.min(step, ICONS.length - 1)]}
-        </span>
+        {(() => {
+          const BeatIcon = ICONS[Math.min(step, ICONS.length - 1)];
+          return (
+            <span className="text-text-secondary" aria-hidden>
+              <BeatIcon size={32} strokeWidth={1.75} />
+            </span>
+          );
+        })()}
         <h3 className="stepper-title">{titles[Math.min(step, titles.length - 1)]}</h3>
         <p className="stepper-body">{beats[step]}</p>
       </div>

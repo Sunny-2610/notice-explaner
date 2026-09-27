@@ -29,6 +29,11 @@ export default {
         'disclaimer-bg': '#FFFBEB',
         'disclaimer-border': '#FDE68A',
         'disclaimer-text': '#92400E',
+
+        // Escalation's own visual identity — distinct from generic error.
+        'escalate-bg': '#FEF2F2',
+        'escalate-border': '#DC2626',
+        'escalate-accent': '#7F1D1D',
       },
       borderRadius: { sm: '4px', md: '8px', lg: '12px', xl: '16px', '2xl': '24px', full: '9999px' },
       fontFamily: {

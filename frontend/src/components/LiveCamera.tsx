@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Camera, Check, FileText, RotateCcw, X } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
 /** Live camera with document-frame guidance. Falls back to file upload. */
@@ -61,8 +62,8 @@ export default function LiveCamera({
           <button onClick={onFallback} className="btn-primary flex-1">
             {t.useUpload}
           </button>
-          <button onClick={onClose} className="btn-secondary flex-1">
-            ✕
+          <button onClick={onClose} className="btn-secondary flex-1 inline-flex items-center justify-center" aria-label="Close">
+            <X size={20} strokeWidth={1.75} aria-hidden />
           </button>
         </div>
       </div>
@@ -75,13 +76,15 @@ export default function LiveCamera({
         <div className="relative rounded-xl overflow-hidden bg-black">
           <img src={preview.url} alt="" className="w-full aspect-[4/3] object-cover" />
         </div>
-        <p className="text-sm text-text-secondary text-center">📄 {t.reviewPhotoHelp}</p>
+        <p className="text-sm text-text-secondary text-center inline-flex items-center gap-1">
+          <FileText size={16} strokeWidth={1.75} aria-hidden /> {t.reviewPhotoHelp}
+        </p>
         <div className="flex gap-2">
-          <button onClick={() => setPreview(null)} className="btn-secondary flex-1">
-            {t.retakeLabel}
+          <button onClick={() => setPreview(null)} className="btn-secondary flex-1 inline-flex items-center justify-center gap-2">
+            <RotateCcw size={20} strokeWidth={1.75} aria-hidden /> {t.retakeLabel}
           </button>
-          <button onClick={() => onCapture(preview.file)} className="btn-primary flex-1">
-            {t.usePhotoLabel}
+          <button onClick={() => onCapture(preview.file)} className="btn-primary flex-1 inline-flex items-center justify-center gap-2">
+            <Check size={20} strokeWidth={1.75} aria-hidden /> {t.usePhotoLabel}
           </button>
         </div>
       </div>
@@ -97,13 +100,15 @@ export default function LiveCamera({
           className="absolute inset-6 border-2 border-dashed border-white rounded-lg pointer-events-none"
         />
       </div>
-      <p className="text-sm text-text-secondary text-center">📄 {t.cameraHelp}</p>
+      <p className="text-sm text-text-secondary text-center inline-flex items-center gap-1">
+        <FileText size={16} strokeWidth={1.75} aria-hidden /> {t.cameraHelp}
+      </p>
       <div className="flex gap-2">
-        <button onClick={capture} className="btn-primary flex-1">
-          {t.capture}
+        <button onClick={capture} className="btn-primary flex-1 inline-flex items-center justify-center gap-2">
+          <Camera size={20} strokeWidth={1.75} aria-hidden /> {t.capture}
         </button>
-        <button onClick={onClose} className="btn-secondary flex-1">
-          ✕
+        <button onClick={onClose} className="btn-secondary flex-1 inline-flex items-center justify-center" aria-label="Close">
+          <X size={20} strokeWidth={1.75} aria-hidden />
         </button>
       </div>
     </div>

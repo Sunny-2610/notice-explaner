@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import { STRINGS, type Lang } from '../i18n/strings';
 
 function level(confidence: number | null | undefined): 'high' | 'medium' | 'low' {
   if (confidence == null) return 'medium';
@@ -7,28 +8,31 @@ function level(confidence: number | null | undefined): 'high' | 'medium' | 'low'
   return 'low';
 }
 
-const DOT: Record<'high' | 'medium' | 'low', string> = {
-  high: '🟢',
-  medium: '🟡',
-  low: '🔴',
-};
-
 export default function FieldRow({
   icon,
   label,
   value,
   confidence,
+  lang,
 }: {
-  icon: string;
+  icon: ReactNode;
   label: string;
   value: string;
   confidence?: number | null;
+  lang: Lang;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const t = STRINGS[lang];
   const lv = level(confidence);
+  const sentence =
+    lv === 'high' ? t.confidenceHigh : lv === 'medium' ? t.confidenceMedium : t.confidenceLow;
   return (
     <div className="border-b border-border last:border-0">
-      <button onClick={() => setExpanded((e) => !e)} className="field-row w-full text-left min-h-[48px]" aria-expanded={expanded}>
+      <button
+        onClick={() => setExpanded((e) => !e)}
+        className="field-row w-full text-left min-h-[48px]"
+        aria-expanded={expanded}
+      >
         <span className="field-icon" aria-hidden>
           {icon}
         </span>
@@ -36,15 +40,9 @@ export default function FieldRow({
           <p className="field-label">{label}</p>
           <p className="field-value">{value}</p>
         </div>
-        <span aria-hidden title={`confidence ${lv}`}>
-          {DOT[lv]}
-        </span>
+        <span aria-hidden title={sentence} className={`conf-dot conf-dot-${lv}`} />
       </button>
-      {expanded && (
-        <p className="pb-3 pl-11 text-sm text-text-secondary">
-          🤖 AI-read value{confidence != null ? ` · confidence ${Math.round(confidence * 100)}%` : ''}
-        </p>
-      )}
+      {expanded && <p className="conf-sentence">{sentence}</p>}
     </div>
   );
 }

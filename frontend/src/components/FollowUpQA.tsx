@@ -21,6 +21,7 @@ export default function FollowUpQA({ jobId, lang }: { jobId: string; lang: Lang 
   const [answer, setAnswer] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [askedCount, setAskedCount] = useState(0);
 
   const submit = async (q: string) => {
     const text = q.trim();
@@ -31,6 +32,7 @@ export default function FollowUpQA({ jobId, lang }: { jobId: string; lang: Lang 
       const r = await askQuestion(jobId, text);
       setAnswer(r.answer);
       setQuestion('');
+      setAskedCount((c) => c + 1);
     } catch {
       setError(t.failed);
     } finally {
@@ -71,6 +73,11 @@ export default function FollowUpQA({ jobId, lang }: { jobId: string; lang: Lang 
           {busy ? '…' : t.askButton}
         </button>
       </form>
+      {askedCount >= 1 && (
+        <p className="text-xs text-text-muted" aria-live="polite">
+          {askedCount}/10 {t.questionsAsked}
+        </p>
+      )}
       {error && <p className="text-sm text-error">{error}</p>}
       {answer && (
         <article className="rounded-xl bg-surface p-4 text-base leading-7 whitespace-pre-line">
