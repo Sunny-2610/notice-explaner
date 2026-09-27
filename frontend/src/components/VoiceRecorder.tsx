@@ -110,10 +110,17 @@ export default function VoiceRecorder({ jobId, lang }: { jobId: string | null; l
         </div>
       ) : (
         <button
-          onMouseDown={start}
-          onMouseUp={stop}
-          onTouchStart={start}
-          onTouchEnd={stop}
+          onPointerDown={() => void start()}
+          onPointerUp={stop}
+          onPointerCancel={stop}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+              e.preventDefault();
+              if (recording) stop();
+              else void start();
+            }
+          }}
+          style={{ touchAction: 'none' }}
           className="btn-secondary w-full mt-3"
         >
           {t.voiceHold}

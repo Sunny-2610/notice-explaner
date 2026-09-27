@@ -8,7 +8,10 @@ Tests force fake by leaving USE_FAKE_AI unset.
 """
 from __future__ import annotations
 
+import hmac
 import os
+
+from fastapi import Header, HTTPException
 
 from ..infrastructure.escalation import YamlEscalationEvaluator
 from ..infrastructure.fake_ai import (
@@ -25,9 +28,22 @@ from ..infrastructure.memory import (
     MemoryReviewQueue,
 )
 
-job_store = MemoryJobStore()
-image_store = MemoryImageStore()
 review_queue = MemoryReviewQueue()
+
+# Optional Postgres job/image stores (compose sets DATABASE_URL); memory otherwise.
+# Mirrors the audit try/except pattern: tests keep working with no DATABASE_URL set.
+try:
+    if os.getenv("DATABASE_URL"):
+        from ..infrastructure.postgres import PostgresImageStore, PostgresJobStore
+
+        job_store = PostgresJobStore()  # type: ignore[assignment]
+        image_store = PostgresImageStore()  # type: ignore[assignment]
+    else:
+        raise RuntimeError("DATABASE_URL unset — memory job/image stores")
+except Exception as exc:
+    print(f"deps: memory job/image store fallback ({exc})")
+    job_store = MemoryJobStore()
+    image_store = MemoryImageStore()
 
 # Optional Postgres audit (compose sets DATABASE_URL); memory otherwise.
 try:
@@ -79,6 +95,22 @@ if os.getenv("BHASHINI_API_KEY") and not USE_FAKE:
 else:
     voice_service = FakeVoiceService()
 escalation_eval = YamlEscalationEvaluator()
+
+def require_reviewer_key(
+    x_reviewer_key: str | None = Header(default=None, alias="X-Reviewer-Key"),
+) -> None:
+    """Simple API-key guard for reviewer endpoints (stopgap until real login).
+
+    Reads ``X-Reviewer-Key`` and compares (constant-time) to REVIEWER_API_KEY.
+    When REVIEWER_API_KEY is unset, auth is disabled for local dev (main.py
+    prints a REVIEWER AUTH DISABLED warning at startup).
+    """
+    expected = os.getenv("REVIEWER_API_KEY", "")
+    if not expected:
+        return
+    if not x_reviewer_key or not hmac.compare_digest(x_reviewer_key, expected):
+        raise HTTPException(status_code=401, detail="missing or invalid reviewer key")
+
 
 # Q&A agent — lazy shape, only used when POST /{job_id}/ask is called.
 # Fake (deterministic, no API) unless a real Gemini key is configured.

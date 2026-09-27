@@ -62,6 +62,16 @@ class MemoryJobStore:
         self.explanations[job_id] = result
         self.explanation_lang[job_id] = target_language
 
+    def get_extraction(self, job_id: str) -> ExtractionResult | None:
+        return self.extractions.get(job_id)
+
+    def update_explanation_text(self, job_id: str, text: str) -> bool:
+        existing = self.explanations.get(job_id)
+        if existing is None:
+            return False
+        existing.explanation_text = text
+        return True
+
     def get_result(self, job_id: str) -> dict | None:
         job = self.jobs.get(job_id)
         if not job:

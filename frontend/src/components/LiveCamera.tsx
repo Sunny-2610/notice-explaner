@@ -17,6 +17,7 @@ export default function LiveCamera({
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [denied, setDenied] = useState(false);
+  const [preview, setPreview] = useState<{ url: string; file: File } | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -46,8 +47,9 @@ export default function LiveCamera({
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d')?.drawImage(video, 0, 0);
+    const url = canvas.toDataURL('image/jpeg');
     canvas.toBlob((blob) => {
-      if (blob) onCapture(new File([blob], 'notice.jpg', { type: 'image/jpeg' }));
+      if (blob) setPreview({ url, file: new File([blob], 'notice.jpg', { type: 'image/jpeg' }) });
     }, 'image/jpeg');
   };
 
@@ -61,6 +63,25 @@ export default function LiveCamera({
           </button>
           <button onClick={onClose} className="btn-secondary flex-1">
             ✕
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (preview) {
+    return (
+      <div className="card-elevated space-y-3">
+        <div className="relative rounded-xl overflow-hidden bg-black">
+          <img src={preview.url} alt="" className="w-full aspect-[4/3] object-cover" />
+        </div>
+        <p className="text-sm text-text-secondary text-center">📄 {t.reviewPhotoHelp}</p>
+        <div className="flex gap-2">
+          <button onClick={() => setPreview(null)} className="btn-secondary flex-1">
+            {t.retakeLabel}
+          </button>
+          <button onClick={() => onCapture(preview.file)} className="btn-primary flex-1">
+            {t.usePhotoLabel}
           </button>
         </div>
       </div>

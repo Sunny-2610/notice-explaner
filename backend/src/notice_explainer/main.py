@@ -11,6 +11,10 @@ from .api.voice import router as voice_router
 
 
 def create_app() -> FastAPI:
+    import os as _os
+
+    if not _os.getenv("REVIEWER_API_KEY"):
+        print("WARNING: REVIEWER AUTH DISABLED — set REVIEWER_API_KEY to protect /api/v1/review/*")
     app = FastAPI(title="Yojana Mitra — Notice Explainer", version="0.1.0")
     app.add_middleware(
         CORSMiddleware,

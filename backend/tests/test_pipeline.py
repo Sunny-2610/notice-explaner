@@ -76,6 +76,36 @@ def test_unsupported_short_circuits_E201():
     assert g["errorCode"] == "E-201"
 
 
+def test_submit_with_queue_enqueues_once_no_double_run(monkeypatch):
+    """When a job_queue is configured, submit() must enqueue to Redis ONLY
+    and must NOT schedule the inline BackgroundTasks _run (else the job is
+    processed twice: once inline + once by worker.py)."""
+    import notice_explainer.api.documents as documents
+
+    client = _fresh_app()
+
+    run_calls: list[str] = []
+    enqueue_calls: list[str] = []
+
+    def fake_run(job_id: str) -> None:
+        run_calls.append(job_id)
+
+    class FakeQueue:
+        def enqueue(self, job_id: str) -> None:
+            enqueue_calls.append(job_id)
+
+    monkeypatch.setattr(documents, "_run", fake_run)
+    monkeypatch.setattr(deps, "job_queue", FakeQueue())
+
+    r = _submit(client, b"FAKE-JPEG-PROPERTY-TAX")
+    assert r.status_code == 202
+    job_id = r.json()["jobId"]
+
+    # Exactly one processing path: the queue. Inline _run must not fire.
+    assert enqueue_calls == [job_id]
+    assert run_calls == []
+
+
 def test_validation_400_on_bad_type_and_language():
     client = _fresh_app()
     bad = client.post(

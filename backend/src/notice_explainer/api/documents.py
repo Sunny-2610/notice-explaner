@@ -36,12 +36,15 @@ async def submit(
             deps.job_store, deps.image_store, deps.audit)
     except ValidationError as exc:
         raise HTTPException(status_code=400, detail={"code": exc.code.value, "message": exc.message})
-    background.add_task(_run, job.job_id)
     if deps.job_queue is not None:
         try:
             deps.job_queue.enqueue(job.job_id)
         except Exception:
-            pass  # BackgroundTasks _run already scheduled inline
+            # Redis enqueue failed — fall back to inline run.
+            background.add_task(_run, job.job_id)
+    else:
+        # No Redis configured (demo/dev path) — run inline.
+        background.add_task(_run, job.job_id)
     return SubmitResponse(jobId=job.job_id, status="queued")
 
 

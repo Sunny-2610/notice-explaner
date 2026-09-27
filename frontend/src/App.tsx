@@ -11,6 +11,7 @@ import FollowUpQA from './components/FollowUpQA';
 import FieldRow from './components/FieldRow';
 import ProcessingStages from './components/ProcessingStages';
 import { submitDocument } from './lib/api';
+import { formatCurrency, formatDate } from './lib/format';
 import { useJobPoll } from './hooks/useJobPoll';
 import { STRINGS, type Lang } from './i18n/strings';
 
@@ -210,7 +211,7 @@ export default function App() {
                           <FieldRow
                             icon="📅"
                             label="Deadline"
-                            value={result.fields.deadlineDate}
+                            value={formatDate(result.fields.deadlineDate, lang)}
                             confidence={result.classificationConfidence}
                           />
                         )}
@@ -218,7 +219,7 @@ export default function App() {
                           <FieldRow
                             icon="💰"
                             label="Amount"
-                            value={String(result.fields.amountOwed)}
+                            value={formatCurrency(result.fields.amountOwed)}
                             confidence={result.classificationConfidence}
                           />
                         )}
