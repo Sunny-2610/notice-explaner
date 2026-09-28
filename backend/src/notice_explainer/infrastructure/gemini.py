@@ -33,15 +33,86 @@ def _key() -> str:
     return key
 
 
-def _generate(parts: list[dict], timeout: int = VISION_REASONING_TIMEOUT_S) -> str:
+def _generate(
+    parts: list[dict],
+    timeout: int = VISION_REASONING_TIMEOUT_S,
+    generation_config: dict | None = None,
+) -> str:
     url = f"{_API}/{_MODEL}:generateContent?key={_key()}"
-    r = httpx.post(url, json={"contents": [{"parts": parts}]}, timeout=timeout)
+    body: dict = {"contents": [{"parts": parts}]}
+    if generation_config is not None:
+        body["generationConfig"] = generation_config
+    r = httpx.post(url, json=body, timeout=timeout)
     r.raise_for_status()
     data = r.json()
+    candidates = data.get("candidates")
+    if not candidates:
+        raise RuntimeError(
+            f"Gemini returned no candidates: {str(data)[:300]}"
+        )
+    finish = candidates[0].get("finishReason")
+    if finish not in (None, "STOP"):
+        raise RuntimeError(
+            f"Gemini blocked (finishReason={finish}): {str(data)[:300]}"
+        )
     try:
-        return data["candidates"][0]["content"]["parts"][0]["text"]
+        return candidates[0]["content"]["parts"][0]["text"]
     except (KeyError, IndexError) as exc:
         raise RuntimeError(f"Unexpected Gemini response: {str(data)[:300]}") from exc
+
+
+_CLASSIFY_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "label": {
+            "type": "string",
+            "enum": [
+                "property_tax_notice",
+                "traffic_challan_summons",
+                "bank_recovery_notice",
+                "unsupported",
+            ],
+        },
+        "confidence": {"type": "number"},
+    },
+    "required": ["label"],
+}
+
+_FIELDS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "issuingAuthority": {"type": ["string", "null"]},
+        "deadlineDate": {"type": ["string", "null"]},
+        "amountOwed": {"type": ["number", "null"]},
+        "citedSection": {"type": ["string", "null"]},
+        "requiredAction": {"type": ["string", "null"]},
+    },
+}
+
+_JSON_CONFIG = {
+    "temperature": 0,
+    "responseMimeType": "application/json",
+}
+
+_LABEL_TO_TYPE = {
+    "property_tax_notice": DocumentType.PROPERTY_TAX_NOTICE,
+    "traffic_challan_summons": DocumentType.TRAFFIC_CHALLAN_SUMMONS,
+    "bank_recovery_notice": DocumentType.BANK_RECOVERY_NOTICE,
+    "unsupported": DocumentType.UNSUPPORTED,
+}
+
+
+def _parse_json_object(out: str) -> dict:
+    """Strict parse first; tolerantly extract the first {...} as fallback."""
+    try:
+        d = json.loads(out)
+        if isinstance(d, dict):
+            return d
+    except json.JSONDecodeError:
+        pass
+    start, end = out.index("{"), out.rindex("}") + 1
+    d = json.loads(out[start:end])
+    return d if isinstance(d, dict) else {}
 
 
 class GeminiVisionExtractor:
@@ -51,9 +122,10 @@ class GeminiVisionExtractor:
         if not image:
             return ExtractionResult(text="", confidence=0.0, provider=self.provider_name)
         b64 = base64.b64encode(image).decode()
+        mime = "image/png" if image.startswith(b"\x89PNG") else "image/jpeg"
         text = _generate([
             {"text": "Transcribe all visible text in this notice verbatim. Return text only."},
-            {"inline_data": {"mime_type": "image/jpeg", "data": b64}},
+            {"inline_data": {"mime_type": mime, "data": b64}},
         ])
         # Vision models rarely return calibrated confidence; 0.85 keeps us
         # above the 0.55 review threshold only when text is non-trivial.
@@ -68,10 +140,27 @@ class GeminiReasoner:
     prompt_version = "p-v1"
 
     def classify(self, text: str) -> ClassificationResult:
-        out = _generate([{"text": (
-            "Classify this Indian notice as exactly one of: "
-            "property_tax_notice, traffic_challan_summons, bank_recovery_notice, unsupported. "
-            "Reply '<label> <confidence 0-1>'.\n\n" + text[:4000])}])
+        out = _generate(
+            [{"text": (
+                "Classify this Indian notice as exactly one of: "
+                "property_tax_notice, traffic_challan_summons, bank_recovery_notice, unsupported. "
+                "Reply with JSON {\"label\": ..., \"confidence\": 0-1}.\n\n" + text[:4000])}],
+            generation_config={**_JSON_CONFIG, "responseSchema": _CLASSIFY_SCHEMA},
+        )
+        try:
+            d = _parse_json_object(out)
+            label = str(d.get("label", "")).strip().lower()
+            try:
+                conf = float(d.get("confidence", 0.85))
+            except (TypeError, ValueError):
+                conf = 0.85
+            conf = min(1.0, max(0.0, conf))
+            if label in _LABEL_TO_TYPE:
+                return ClassificationResult(_LABEL_TO_TYPE[label], conf)
+            return ClassificationResult(DocumentType.UNSUPPORTED, 0.45)
+        except (ValueError, json.JSONDecodeError, AttributeError):
+            pass
+        # Tolerant fallback: legacy free-text parse.
         low = out.lower()
         conf = 0.85
         for tok in low.replace(",", " ").split():
@@ -90,13 +179,15 @@ class GeminiReasoner:
         return ClassificationResult(DocumentType.UNSUPPORTED, conf if "unsupported" in low else 0.45)
 
     def extract_fields(self, text: str, document_type: DocumentType) -> ExtractedFields:
-        out = _generate([{"text": (
-            "Extract JSON with keys issuingAuthority, deadlineDate (ISO-8601 or null), "
-            "amountOwed (number or null), citedSection, requiredAction. JSON only.\n\n"
-            + text[:4000])}])
+        out = _generate(
+            [{"text": (
+                "Extract JSON with keys issuingAuthority, deadlineDate (ISO-8601 or null), "
+                "amountOwed (number or null), citedSection, requiredAction. JSON only.\n\n"
+                + text[:4000])}],
+            generation_config={**_JSON_CONFIG, "responseSchema": _FIELDS_SCHEMA},
+        )
         try:
-            start, end = out.index("{"), out.rindex("}") + 1
-            d = json.loads(out[start:end])
+            d = _parse_json_object(out)
         except (ValueError, json.JSONDecodeError):
             d = {}
         return ExtractedFields(
