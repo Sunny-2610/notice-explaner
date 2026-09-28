@@ -10,6 +10,8 @@ import VerdictBanner from './components/VerdictBanner';
 import ProgressiveExplanation from './components/ProgressiveExplanation';
 import FollowUpQA from './components/FollowUpQA';
 import FieldRow from './components/FieldRow';
+import LegalAidCard from './components/LegalAidCard';
+import ReminderCard from './components/ReminderCard';
 import ProcessingStages from './components/ProcessingStages';
 import { submitDocument } from './lib/api';
 import { formatCurrency, formatDate } from './lib/format';
@@ -266,6 +268,7 @@ export default function App() {
                       {result.explanation && (
                         <ProgressiveExplanation text={result.explanation} lang={lang} />
                       )}
+                      {result.escalation.flagged && <LegalAidCard lang={lang} />}
                     </div>
                     <div className="space-y-4 lg:sticky lg:top-4">
                     {(result.fields?.issuingAuthority ||
@@ -278,7 +281,7 @@ export default function App() {
                             icon={<Landmark size={20} strokeWidth={1.75} aria-hidden />}
                             label="Authority"
                             value={result.fields.issuingAuthority}
-                            confidence={result.classificationConfidence}
+                            confidence={result.fields.fieldConfidence?.issuingAuthority}
                             lang={lang}
                           />
                         )}
@@ -287,7 +290,7 @@ export default function App() {
                             icon={<Calendar size={20} strokeWidth={1.75} aria-hidden />}
                             label="Deadline"
                             value={formatDate(result.fields.deadlineDate, lang)}
-                            confidence={result.classificationConfidence}
+                            confidence={result.fields.fieldConfidence?.deadlineDate}
                             lang={lang}
                           />
                         )}
@@ -296,11 +299,20 @@ export default function App() {
                             icon={<IndianRupee size={20} strokeWidth={1.75} aria-hidden />}
                             label="Amount"
                             value={formatCurrency(result.fields.amountOwed)}
-                            confidence={result.classificationConfidence}
+                            confidence={result.fields.fieldConfidence?.amountOwed}
                             lang={lang}
                           />
                         )}
                       </div>
+                    )}
+                    {result.deadline && (
+                      <ReminderCard
+                        jobId={result.jobId}
+                        daysRemaining={result.deadline.daysRemaining}
+                        overdue={result.deadline.overdue}
+                        checklist={result.deadline.checklist}
+                        lang={lang}
+                      />
                     )}
                     {(result.fields?.citedSection || result.fields?.requiredAction) && (
                       <details className="card">
@@ -341,6 +353,11 @@ export default function App() {
                   <div className="card">
                     <p className="chip-warning self-start">{result.errorCode ?? 'review'}</p>
                     <p className="text-base mt-2">{t.underReview}</p>
+                    {result.errorCode === 'E-401' && result.escalation.flagged && (
+                      <div className="mt-3">
+                        <LegalAidCard lang={lang} />
+                      </div>
+                    )}
                   </div>
                 )}
                 {result.status === 'failed' && (

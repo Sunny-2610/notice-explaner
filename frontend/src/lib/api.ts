@@ -18,11 +18,17 @@ export interface DocumentResult {
     amountOwed?: number | null;
     citedSection?: string | null;
     requiredAction?: string | null;
+    fieldConfidence?: Record<string, number>;
   };
   explanation?: string | null;
   disclaimerIncluded: boolean;
   escalation: { flagged: boolean; matchedRuleIds: string[] };
   voiceAvailable: boolean;
+  deadline?: {
+    daysRemaining: number | null;
+    overdue: boolean;
+    checklist: string[];
+  } | null;
 }
 
 export async function submitDocument(
