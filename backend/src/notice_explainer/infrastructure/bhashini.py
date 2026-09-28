@@ -3,6 +3,13 @@
 Only constructed when BHASHINI_API_KEY is set. Any failure/timeout raises
 so callers fall back to text-only with voiceAvailable=false (E-302) —
 voice NEVER fails the job.
+
+NOTE: the Bhashini auth/pipeline-config flow (endpoint URL, Authorization
+header format, per-language ASR/TTS service-id discovery, audioFormat /
+samplingRate fields) MUST be verified against the current official Bhashini
+docs before any pilot — do not treat the payload shapes below as
+authoritative, and never guess service ids (unset ids raise so callers
+fall back to E-302).
 """
 from __future__ import annotations
 
@@ -22,19 +29,60 @@ def _headers() -> dict:
     return {"Authorization": key, "Content-Type": "application/json"}
 
 
+def _service_id(prefix: str, lang: str) -> str:
+    """Env-configured Bhashini service id, e.g. BHASHINI_ASR_SERVICE_ID_HI.
+
+    Raises when unset — never guess ids; callers fall back to E-302.
+    """
+    key = f"{prefix}_{lang.upper()}"
+    sid = os.getenv(key, "")
+    if not sid:
+        raise RuntimeError(f"{key} not set — voice unavailable (E-302)")
+    return sid
+
+
+def _parse_asr_transcript(data: dict) -> str:
+    try:
+        return data["pipelineResponse"][0]["output"][0]["source"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise RuntimeError(
+            f"Unexpected Bhashini ASR response: {str(data)[:300]}"
+        ) from exc
+
+
 class BhashiniVoiceService:
     def speech_to_text(self, audio: bytes, lang: str) -> str:
         import base64
-        payload = {"pipelineTasks": [{"taskType": "asr", "config": {"language": {"sourceLanguage": lang}}}],
-                   "inputData": {"audio": [{"audioContent": base64.b64encode(audio).decode()}]}}
+        service_id = _service_id("BHASHINI_ASR_SERVICE_ID", lang)
+        payload = {
+            "pipelineTasks": [{
+                "taskType": "asr",
+                "config": {
+                    "language": {"sourceLanguage": lang},
+                    "serviceId": service_id,
+                    "audioFormat": "wav",
+                    "samplingRate": 16000,
+                },
+            }],
+            "inputData": {"audio": [{"audioContent": base64.b64encode(audio).decode()}]},
+        }
         r = httpx.post(_URL, headers=_headers(), json=payload, timeout=VOICE_TIMEOUT_S)
         r.raise_for_status()
-        return str(r.json())
+        return _parse_asr_transcript(r.json())
 
     def text_to_speech(self, text: str, lang: str) -> bytes:
         import base64
-        payload = {"pipelineTasks": [{"taskType": "tts", "config": {"language": {"sourceLanguage": lang}}}],
-                   "inputData": {"input": [{"source": text}]}}
+        service_id = _service_id("BHASHINI_TTS_SERVICE_ID", lang)
+        payload = {
+            "pipelineTasks": [{
+                "taskType": "tts",
+                "config": {
+                    "language": {"sourceLanguage": lang},
+                    "serviceId": service_id,
+                },
+            }],
+            "inputData": {"input": [{"source": text}]},
+        }
         r = httpx.post(_URL, headers=_headers(), json=payload, timeout=VOICE_TTS_TIMEOUT_S)
         r.raise_for_status()
         data = r.json()
