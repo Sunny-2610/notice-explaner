@@ -15,7 +15,7 @@ import ReminderCard from './components/ReminderCard';
 import ProcessingStages from './components/ProcessingStages';
 import { submitDocument } from './lib/api';
 import { formatCurrency, formatDate } from './lib/format';
-import { useJobPoll } from './hooks/useJobPoll';
+import { useJobStream as useJobPoll } from './hooks/useJobStream';
 import { STRINGS, type Lang } from './i18n/strings';
 
 type Tab = 'explain' | 'how' | 'faq' | 'review';

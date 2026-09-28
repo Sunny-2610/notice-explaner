@@ -6,9 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .api.audit import router as audit_router
 from .api.documents import router as documents_router
+from .api.events import router as events_router
 from .api.legal_aid import router as legal_aid_router
 from .api.review import router as review_router
 from .api.voice import router as voice_router
+from .api.whatsapp import router as whatsapp_router
 
 
 def create_app() -> FastAPI:
@@ -24,9 +26,11 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(documents_router)
+    app.include_router(events_router)
     app.include_router(legal_aid_router)
     app.include_router(audit_router)
     app.include_router(voice_router)
+    app.include_router(whatsapp_router)
     app.include_router(review_router)
 
     @app.get("/health")

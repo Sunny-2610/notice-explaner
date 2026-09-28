@@ -58,8 +58,11 @@ def get_result(job_id: str) -> DocumentResult:
     result = deps.job_store.get_result(job_id)
     if result is None:
         raise HTTPException(status_code=404, detail="unknown jobId")
-    # Deadline + checklist are presentation-layer derivations. The stores are
-    # untouched — this only enriches the wire shape.
+    return DocumentResult(**enrich_with_deadline(result))
+
+
+def enrich_with_deadline(result: dict) -> dict:
+    """Attach the presentation-layer deadline/checklist without touching stores."""
     try:
         fields = result.get("fields") or {}
         iso = fields.get("deadlineDate")
@@ -77,7 +80,7 @@ def get_result(job_id: str) -> DocumentResult:
             result["deadline"] = None
     except Exception:
         result["deadline"] = None
-    return DocumentResult(**result)
+    return result
 
 
 @router.post("/{job_id}/ask", response_model=AskResponse)
