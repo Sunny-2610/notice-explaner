@@ -349,3 +349,68 @@ density is good here, calm/whitespace is not the goal.
 Ship in this order — §1–4 are the ones that change how the product *feels*
 on first use (the "5 seconds to safety" thesis); §5–8 are trust and
 craft polish that compound on repeat use and for the reviewer role.
+
+---
+
+## 11. New components
+
+### 11.1 ReminderCard (`frontend/src/components/ReminderCard.tsx`)
+
+Small, quiet, never louder than the verdict. Contents:
+
+- **Days-remaining chip** — small pill (`bg-surface`, secondary text), not a
+  banner. Overdue state uses the error tint and offers **no** reminder
+  button (a past deadline has nothing to remind toward).
+- **Tickable checklist** — local state only (`useState<boolean[]>`, no API),
+  each row a 48px label + checkbox. Items come from the backend
+  `deadline.checklist` (generic, safe, no legal claims).
+- **Add to calendar** — plain anchor to
+  `GET /api/v1/documents/{jobId}/reminder.ics` (built with `VITE_API_BASE`
+  like other lib files), styled `btn-secondary`, full-width, Lucide
+  `CalendarPlus` at 20px / 1.75 stroke. Hidden when overdue or when there is
+  no upcoming deadline.
+- Icons: `CalendarClock` (header) + `CalendarPlus` (button). No emoji.
+
+Placement: directly after the key-facts card in the right column
+(`App.tsx` desktop `lg:grid-cols-[1.6fr_1fr]`), so on mobile it reads
+verdict → explanation → (legal aid if escalated) → key facts → reminder →
+details → Q&A → voice.
+
+### 11.2 LegalAidCard (`frontend/src/components/LegalAidCard.tsx`)
+
+Escalation-conditional citizen surface for free legal help. Contents:
+
+- **Title** (`Scale` icon) + one-line eligibility caveat
+  ("eligibility rules apply; the helpline can tell you").
+- **`tel:` call buttons** — `btn-secondary` (48px), Lucide `Phone`,
+  `aria-label` includes name + number. Optional official URL as a plain
+  text link underneath the name.
+- **State picker** — rendered only when `GET /api/v1/legal-aid/states`
+  returns a non-empty list; selection persists in
+  `localStorage('ym_legal_aid_state')`. Hidden otherwise (current seed has
+  national entries only).
+- **Disclaimer line** — same quiet `t.disclaimer` copy as the rest of the
+  result screen.
+- Data: national entries only (NALSA 15100, Tele-Law 14454) until a
+  maintainer populates `backend/data/legal_aid.json` states from official
+  sources. No numbers are invented in code.
+
+### 11.3 Escalated render order (extends §1's screen-order contract)
+
+The verdict stays the loudest thing on screen. For escalated results:
+
+1. Verdict banner (danger).
+2. AI-disclosure line.
+3. Progressive explanation.
+4. **LegalAidCard** — directly after the explanation, before key facts
+   (left column on desktop). Help first, facts second, when the user is in
+   trouble.
+5. Key facts (with grounded per-field confidence dots).
+6. **ReminderCard** (if a deadline exists).
+7. Collapsed details → Q&A → voice playback.
+
+For `awaiting_review` + `E-401` (the normal escalated path — escalated jobs
+route to review, so there is no explanation to show): LegalAidCard renders
+**inside** the "under review" card, never alongside an explanation.
+LegalAidCard never renders for non-flagged results — the flag is only read
+(`result.escalation.flagged`), never set, by the frontend.
