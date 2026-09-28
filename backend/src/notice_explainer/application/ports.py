@@ -131,3 +131,13 @@ class EscalationEvaluator(Protocol):
     def evaluate(
         self, text: str, stage: EscalationStage
     ) -> EscalationResult: ...
+
+
+class LegalAidDirectory(Protocol):
+    """Free legal-aid listings. No auth, no user data stored."""
+
+    def national(self) -> list[dict]: ...
+    def states(self) -> list[dict]: ...
+    def lookup(
+        self, state: str | None = None, district: str | None = None
+    ) -> dict: ...

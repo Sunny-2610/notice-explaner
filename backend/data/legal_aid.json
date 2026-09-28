@@ -1,0 +1,19 @@
+{
+  "_note": "Maintainer: verify EVERY phone number and URL on nalsa.gov.in before any demo or pilot. Seed only national entries from official sources; populate 'states' from official SLSA/DLSA listings. Do NOT invent state or district numbers.",
+  "_schema_states": "states: { '<state-code>': { 'name': str, 'slsa': { 'name': str, 'phone'?: str, 'url'?: str }, 'districts': { '<district-name>': { 'dlsa': { 'name': str, 'phone'?: str, 'url'?: str } } } } }",
+  "national": [
+    {
+      "name": "NALSA legal services helpline",
+      "phone": "15100",
+      "url": "https://nalsa.gov.in",
+      "verified": false
+    },
+    {
+      "name": "Tele-Law",
+      "phone": "14454",
+      "url": "https://www.tele-law.in",
+      "verified": false
+    }
+  ],
+  "states": {}
+}
