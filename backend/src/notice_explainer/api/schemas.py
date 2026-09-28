@@ -23,6 +23,12 @@ class FieldsPayload(BaseModel):
     fieldConfidence: dict[str, float] = {}
 
 
+class DeadlineInfo(BaseModel):
+    daysRemaining: int | None = None
+    overdue: bool = False
+    checklist: list[str] = []
+
+
 class DocumentResult(BaseModel):
     jobId: str
     status: str
@@ -35,6 +41,7 @@ class DocumentResult(BaseModel):
     disclaimerIncluded: bool = False
     escalation: EscalationPayload = EscalationPayload(flagged=False)
     voiceAvailable: bool = True
+    deadline: DeadlineInfo | None = None
 
 
 class ReviewItem(BaseModel):
