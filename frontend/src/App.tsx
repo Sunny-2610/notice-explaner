@@ -41,6 +41,9 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
+  // Home-screen voice transcript waiting for the job to complete — then
+  // FollowUpQA auto-submits it once, so the mic never goes nowhere.
+  const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const desktopFileRef = useRef<HTMLInputElement>(null);
   const t = STRINGS[lang];
@@ -68,6 +71,7 @@ export default function App() {
   const submitFile = async (f: File) => {
     setBusy(true);
     setSubmitError(null);
+    setPendingQuestion(null);
     try {
       if (f.size > 10 * 1024 * 1024) throw new Error(t.badFile);
       if (!['image/jpeg', 'image/png'].includes(f.type)) throw new Error(t.badFile);
@@ -166,7 +170,7 @@ export default function App() {
                     <p className="camera-subtitle">{t.cameraSub}</p>
                     <span className="camera-cta">{t.cameraCta}</span>
                   </button>
-                  <VoiceRecorder jobId={jobId} lang={lang} variant="hero" />
+                  <VoiceRecorder jobId={jobId} lang={lang} variant="hero" onTranscript={setPendingQuestion} />
                 </div>
                 {/* Desktop: upload-first peer grid (QR-to-mobile flow intentionally
                     omitted — no shareable-link scheme exists yet). */}
@@ -185,7 +189,7 @@ export default function App() {
                       {t.useUpload}
                     </button>
                   </div>
-                  <VoiceRecorder jobId={jobId} lang={lang} variant="hero" />
+                  <VoiceRecorder jobId={jobId} lang={lang} variant="hero" onTranscript={setPendingQuestion} />
                 </div>
               </>
             )}
@@ -335,7 +339,14 @@ export default function App() {
                         </div>
                       </details>
                     )}
-                      {result.explanation && <FollowUpQA jobId={result.jobId} lang={lang} />}
+                      {result.explanation && (
+                        <FollowUpQA
+                          jobId={result.jobId}
+                          lang={lang}
+                          initialQuestion={pendingQuestion}
+                          onInitialConsumed={() => setPendingQuestion(null)}
+                        />
+                      )}
                       <VoicePlayer jobId={result.jobId} lang={lang} />
                     </div>
                   </div>

@@ -10,10 +10,12 @@ export default function VoiceRecorder({
   jobId,
   lang,
   variant = 'default',
+  onTranscript,
 }: {
   jobId: string | null;
   lang: Lang;
   variant?: 'default' | 'hero';
+  onTranscript?: (text: string) => void;
 }) {
   const t = STRINGS[lang];
   const [recording, setRecording] = useState(false);
@@ -35,6 +37,9 @@ export default function VoiceRecorder({
       return;
     }
     setTranscription(r.transcription);
+    // Hand the transcript to the app so it can auto-ask once the job
+    // completes — the mic button always leads somewhere.
+    if (r.transcription && r.transcription.trim()) onTranscript?.(r.transcription);
   };
 
   // Auto-send stashed audio once a job exists.
