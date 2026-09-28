@@ -2,7 +2,18 @@
 # Deployed WITHOUT an app redeploy; every evaluation records `version` in the audit log.
 # Design constraint: ANY match sets escalate=true regardless of severity.
 # Severity is triage-only for reviewers, never suppresses escalation.
-version: 3
+#
+# Devanagari note (v4):
+# - Devanagari patterns below are PLAIN SUBSTRINGS with NO \b word boundaries.
+#   Python's \b is unreliable next to Devanagari vowel signs / nukta / conjuncts
+#   (it treats matras inconsistently), so \b would silently MISS real summons /
+#   warrant / seizure notices. Plain substring matching is intentional.
+# - Over-triggering (a substring hitting inside a longer innocent word) is the
+#   INTENDED safe failure: escalation only routes to human review, it never
+#   auto-blocks or auto-decides. Zero false negatives is the success metric.
+# - Where nukta and non-nukta spellings both exist, BOTH are listed
+#   (e.g. गिरफ्तार + गिरफ़्तार, वारंट + वॉरंट).
+version: 4
 rules:
   - id: R-001
     pattern: '\bsummons\b'
@@ -20,3 +31,23 @@ rules:
     pattern: '\bcourt\b'
     severity: medium
     description: 'General court reference'
+  - id: R-005
+    pattern: '\bsarfaesi\b|\bnpa\b|\battachment\b|\bprosecution\b|\bimprisonment\b|\bdecree\b'
+    severity: high
+    description: 'Serious enforcement / adjudication terms (English)'
+  - id: R-101
+    pattern: 'समन|सम्मन|समन्स'
+    severity: high
+    description: 'Summons terms Hindi/Marathi (Devanagari, no word boundary)'
+  - id: R-102
+    pattern: 'गिरफ्तार|गिरफ़्तार|वारंट|वॉरंट|अटक'
+    severity: high
+    description: 'Arrest / warrant terms Hindi/Marathi (Devanagari, no word boundary)'
+  - id: R-103
+    pattern: 'कुर्की|नीलामी|जब्ती|जप्ती|वसूली|वसुली|लिलाव'
+    severity: high
+    description: 'Recovery / seizure / auction terms Hindi/Marathi (Devanagari, no word boundary)'
+  - id: R-104
+    pattern: 'न्यायालय|अदालत|कोर्ट'
+    severity: medium
+    description: 'Court terms Hindi/Marathi (Devanagari, no word boundary)'
