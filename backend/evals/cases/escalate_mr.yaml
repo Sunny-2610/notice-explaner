@@ -1,0 +1,82 @@
+# Synthetic eval cases — Marathi must-escalate. NO real personal data.
+- id: MR-ESC-01
+  lang: mr
+  text: "समन्स जारी: 18 ऑक्टोबर 2026 रोजी न्यायालयात हजर राहा. रक्कम 2000 रुपये. कलम 177."
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "न्यायालय"
+    deadlineDate: "2026-10-18"
+    amountOwed: 2000
+    citedSection: "कलम 177"
+    requiredAction: "न्यायालयात हजर राहा."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: MR-ESC-02
+  lang: mr
+  text: "पोलीस ठाणे: वॉरंट जारी झाले आहे. हजर न राहिल्यास अटक होईल. तारीख 07-02-2027. कलम 174. पोलीस ठाण्याशी संपर्क साधा."
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "पोलीस ठाणे"
+    deadlineDate: "2027-02-07"
+    amountOwed: null
+    citedSection: "कलम 174"
+    requiredAction: "पोलीस ठाण्याशी संपर्क साधा."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    citedSection: true
+    requiredAction: true
+- id: MR-ESC-03
+  lang: mr
+  text: "बँकेची सूचना: थकबाकी वसुलीसाठी मालमत्तेची जप्ती व लिलाव होईल. रक्कम 95000 रुपये. तारीख 30.03.2027. बँकेशी संपर्क साधा."
+  expected_type: bank_recovery_notice
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "बँक"
+    deadlineDate: "2027-03-30"
+    amountOwed: 95000
+    citedSection: null
+    requiredAction: "बँकेशी संपर्क साधा."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    requiredAction: true
+- id: MR-ESC-04
+  lang: mr
+  text: "कोर्टाचा आदेश: वारंट जारी. 12 जानेवारी 2027 रोजी हजर राहा."
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "कोर्ट"
+    deadlineDate: "2027-01-12"
+    amountOwed: null
+    citedSection: null
+    requiredAction: "12 जानेवारी 2027 रोजी हजर राहा."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    requiredAction: true
+- id: MR-ESC-05
+  lang: mr
+  text: "न्यायालयाची नोटीस: समन्स बजावले. रक्कम ५००० रुपये. तारीख 15/06/2027. कलम 138. न्यायालयात हजर राहा."
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "न्यायालय"
+    deadlineDate: "2027-06-15"
+    amountOwed: 5000
+    citedSection: "कलम 138"
+    requiredAction: "न्यायालयात हजर राहा."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true

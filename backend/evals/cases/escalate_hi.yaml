@@ -1,0 +1,97 @@
+# Synthetic eval cases — Hindi must-escalate. NO real personal data.
+- id: HI-ESC-01
+  lang: hi
+  text: "न्यायालय समन: आपको 20 अक्टूबर 2026 को जिला न्यायालय में उपस्थित होना है। रकम 1500 रुपये। धारा 177।"
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "जिला न्यायालय"
+    deadlineDate: "2026-10-20"
+    amountOwed: 1500
+    citedSection: "धारा 177"
+    requiredAction: "आपको 20 अक्टूबर 2026 को जिला न्यायालय में उपस्थित होना है।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: HI-ESC-02
+  lang: hi
+  text: "पुलिस थाने से वारंट जारी किया गया है। उपस्थित न होने पर गिरफ्तार किया जाएगा। मामला अदालत में है। तारीख 05-12-2026। धारा 174। अदालत में उपस्थित हों।"
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "पुलिस थाने"
+    deadlineDate: "2026-12-05"
+    amountOwed: null
+    citedSection: "धारा 174"
+    requiredAction: "अदालत में उपस्थित हों।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    citedSection: true
+    requiredAction: true
+- id: HI-ESC-03
+  lang: hi
+  text: "बकाया वसूली हेतु कुर्की और नीलामी की कार्रवाई होगी। बैंक सूचना। अंतिम तारीख 15-01-2027। रकम 85000 रुपये। धारा 13। बैंक से संपर्क करें।"
+  expected_type: bank_recovery_notice
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "बैंक"
+    deadlineDate: "2027-01-15"
+    amountOwed: 85000
+    citedSection: "धारा 13"
+    requiredAction: "बैंक से संपर्क करें।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: HI-ESC-04
+  lang: hi
+  text: "अदालत का आदेश: गिरफ़्तार वारंट जारी। 10 नवंबर 2026 को हाजिर हों। धारा 70।"
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "अदालत"
+    deadlineDate: "2026-11-10"
+    amountOwed: null
+    citedSection: "धारा 70"
+    requiredAction: "10 नवंबर 2026 को हाजिर हों।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    citedSection: true
+    requiredAction: true
+- id: HI-ESC-05
+  lang: hi
+  text: "कोर्ट के आदेश से संपत्ति की जब्ती होगी। रकम 120000 रुपये। तारीख 20/12/2026। संपत्ति की जब्ती से पहले कार्यालय से संपर्क करें।"
+  expected_type: bank_recovery_notice
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "कोर्ट"
+    deadlineDate: "2026-12-20"
+    amountOwed: 120000
+    citedSection: null
+    requiredAction: "संपत्ति की जब्ती से पहले कार्यालय से संपर्क करें।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    requiredAction: true
+- id: HI-ESC-06
+  lang: hi
+  text: "सम्मन जारी: 25 दिसंबर 2026 को न्यायालय में उपस्थित हों।"
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "न्यायालय"
+    deadlineDate: "2026-12-25"
+    amountOwed: null
+    citedSection: null
+    requiredAction: null
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true

@@ -1,0 +1,66 @@
+# Synthetic eval cases — English must-escalate. NO real personal data.
+- id: EN-ESC-01
+  lang: en
+  text: "COURT SUMMONS: you are summoned to appear on 2026-10-20. A warrant may issue if ignored. Amount Rs 1500. MV Act 177. Appear before the court on the given date."
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "Court"
+    deadlineDate: "2026-10-20"
+    amountOwed: 1500
+    citedSection: "MV Act 177"
+    requiredAction: "Appear before the court on the given date."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: EN-ESC-02
+  lang: en
+  text: "Bank notice: SARFAESI action. Your account is NPA. Symbolic attachment of the property will follow. Amount Rs 250000. Due 2027-01-31. Section 13. Contact the bank within 30 days."
+  expected_type: bank_recovery_notice
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "Bank"
+    deadlineDate: "2027-01-31"
+    amountOwed: 250000
+    citedSection: "Section 13"
+    requiredAction: "Contact the bank within 30 days."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: EN-ESC-03
+  lang: en
+  text: "Sessions Court notice: prosecution under Section 420 may lead to imprisonment up to 3 years. Decree attached. Attend the hearing on the given date. Hearing on 15 November 2026."
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "Sessions Court"
+    deadlineDate: "2026-11-15"
+    amountOwed: null
+    citedSection: "Section 420"
+    requiredAction: "Attend the hearing on the given date."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    citedSection: true
+    requiredAction: true
+- id: EN-ESC-04
+  lang: en
+  text: "Police Station notice: arrest warrant issued. Surrender at the police station. Dated 01/12/2026."
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "Police Station"
+    deadlineDate: "2026-12-01"
+    amountOwed: null
+    citedSection: null
+    requiredAction: "Surrender at the police station."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    requiredAction: true

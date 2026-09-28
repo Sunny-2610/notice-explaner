@@ -1,0 +1,15 @@
+# Synthetic eval cases — unsupported documents. NO real personal data.
+- id: UNS-01
+  lang: en
+  text: "Wedding invitation in English. Join us for dinner on Sunday. No legal content."
+  expected_type: unsupported
+  must_escalate: false
+  llm_fields: {}
+  expected_grounded: {}
+- id: UNS-02
+  lang: hi
+  text: "विद्यालय प्रवेश सूचना: कक्षा 1 में प्रवेश हेतु फॉर्म भरें। अंतिम तारीख 31-12-2026।"
+  expected_type: unsupported
+  must_escalate: false
+  llm_fields: {}
+  expected_grounded: {}

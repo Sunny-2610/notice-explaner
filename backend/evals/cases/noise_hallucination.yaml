@@ -1,0 +1,99 @@
+# Synthetic eval cases — OCR noise, hallucinations, partial/low overlap. NO real personal data.
+- id: OCR-01
+  lang: en
+  text: "MUNICIPAL   CORPORATION संपत्ति कर   सूचना।  रकम ₹४५००।  तारीख 15/11/2026।  धारा 12A।"
+  expected_type: property_tax_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "Municipal Corporation"
+    deadlineDate: "2026-11-15"
+    amountOwed: 4500
+    citedSection: "धारा 12A"
+    requiredAction: "Pay within 30 days."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: false
+- id: OCR-02
+  lang: hi
+  text: "न्यायालय     समन :  20 अक्टूबर 2026 को   हाजिर हों।"
+  expected_type: traffic_challan_summons
+  must_escalate: true
+  llm_fields:
+    issuingAuthority: "न्यायालय"
+    deadlineDate: "2026-10-20"
+    amountOwed: null
+    citedSection: null
+    requiredAction: "20 अक्टूबर 2026 को हाजिर हों।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    requiredAction: true
+- id: HALL-01
+  lang: en
+  text: "MUNICIPAL CORPORATION property tax demand notice. Amount Rs 4500. Due 2026-11-15 under Section 12A. Pay at ward office within 30 days."
+  expected_type: property_tax_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "Municipal Corporation"
+    deadlineDate: "2027-05-01"
+    amountOwed: 99999
+    citedSection: "Section 12A"
+    requiredAction: "Pay at ward office within 30 days."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: false
+    amountOwed: false
+    citedSection: true
+    requiredAction: true
+- id: HALL-02
+  lang: hi
+  text: "नगर निगम संपत्ति कर मांग सूचना। रकम 4500 रुपये। अंतिम तारीख 15 नवंबर 2026। धारा 12A। 30 दिनों में भुगतान करें।"
+  expected_type: property_tax_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "नगर निगम"
+    deadlineDate: "2026-11-15"
+    amountOwed: 77777
+    citedSection: "धारा 99Z"
+    requiredAction: "30 दिनों में भुगतान करें।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: false
+    citedSection: false
+    requiredAction: true
+- id: LOW-01
+  lang: en
+  text: "Ward office tax notice. Pay Rs 200 at the counter. Due 2026-12-31."
+  expected_type: property_tax_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "Central Revenue Headquarters"
+    deadlineDate: "2026-12-31"
+    amountOwed: 200
+    citedSection: null
+    requiredAction: "Pay Rs 200 at the counter."
+  expected_grounded:
+    issuingAuthority: false
+    deadlineDate: true
+    amountOwed: true
+    requiredAction: true
+- id: PART-01
+  lang: en
+  text: "Municipal Corporation Ward notice. Pay Rs 300. Due 2026-12-31."
+  expected_type: property_tax_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "Municipal Corporation Ward Office"
+    deadlineDate: "2026-12-31"
+    amountOwed: 300
+    citedSection: null
+    requiredAction: "Pay Rs 300."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    requiredAction: true

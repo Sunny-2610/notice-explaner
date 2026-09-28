@@ -1,0 +1,151 @@
+# Synthetic eval cases — benign (no trigger words). NO real personal data.
+- id: EN-BEN-01
+  lang: en
+  text: "MUNICIPAL CORPORATION property tax demand notice. Amount Rs 4500. Due 2026-11-15 under Section 12A. Pay at ward office within 30 days."
+  expected_type: property_tax_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "Municipal Corporation"
+    deadlineDate: "2026-11-15"
+    amountOwed: 4500
+    citedSection: "Section 12A"
+    requiredAction: "Pay at ward office within 30 days."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: EN-BEN-02
+  lang: en
+  text: "Traffic challan: fine Rs 500 for jumping the signal. Pay online within 60 days. Challan no C-8891 dated 10-09-2026. MV Act 177. Issued by Traffic Police."
+  expected_type: traffic_challan_summons
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "Traffic Police"
+    deadlineDate: "2026-09-10"
+    amountOwed: 500
+    citedSection: "MV Act 177"
+    requiredAction: "Pay online within 60 days."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: EN-BEN-03
+  lang: en
+  text: "City Bank home loan account statement for October 2026. EMI Rs 12500 debited. Next EMI due 05-12-2026. Contact your branch for details."
+  expected_type: bank_recovery_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "City Bank"
+    deadlineDate: "2026-12-05"
+    amountOwed: 12500
+    citedSection: null
+    requiredAction: "Contact your branch for details."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    requiredAction: true
+- id: EN-BEN-04
+  lang: en
+  text: "Town Panchayat water tax bill. Amount Rs 780. Due 2026-12-31. Pay at the counter."
+  expected_type: property_tax_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "Town Panchayat"
+    deadlineDate: "2026-12-31"
+    amountOwed: 780
+    citedSection: null
+    requiredAction: "Pay at the counter."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    requiredAction: true
+- id: HI-BEN-01
+  lang: hi
+  text: "नगर निगम संपत्ति कर मांग सूचना। रकम 4500 रुपये। अंतिम तारीख 15 नवंबर 2026। धारा 12A। 30 दिनों में भुगतान करें।"
+  expected_type: property_tax_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "नगर निगम"
+    deadlineDate: "2026-11-15"
+    amountOwed: 4500
+    citedSection: "धारा 12A"
+    requiredAction: "30 दिनों में भुगतान करें।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: HI-BEN-02
+  lang: hi
+  text: "यातायात चालान: सिग्नल तोड़ने पर 500 रुपये जुर्माना। 60 दिनों में ऑनलाइन भुगतान करें। चालान संख्या C-8891, तारीख 10-09-2026। धारा 177। यातायात पुलिस द्वारा जारी।"
+  expected_type: traffic_challan_summons
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "यातायात पुलिस"
+    deadlineDate: "2026-09-10"
+    amountOwed: 500
+    citedSection: "धारा 177"
+    requiredAction: "60 दिनों में ऑनलाइन भुगतान करें।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: HI-BEN-03
+  lang: hi
+  text: "सिटी बैंक गृह ऋण खाता विवरण अक्टूबर 2026। EMI 12500 रुपये। अगली EMI तारीख 05-12-2026। शाखा से संपर्क करें।"
+  expected_type: bank_recovery_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "सिटी बैंक"
+    deadlineDate: "2026-12-05"
+    amountOwed: 12500
+    citedSection: null
+    requiredAction: "शाखा से संपर्क करें।"
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    requiredAction: true
+- id: MR-BEN-01
+  lang: mr
+  text: "महानगरपालिका मालमत्ता कर मागणी सूचना. रक्कम 4500 रुपये. अंतिम तारीख 15 नोव्हेंबर 2026. कलम 12A. 30 दिवसांत भरणा करा."
+  expected_type: property_tax_notice
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "महानगरपालिका"
+    deadlineDate: "2026-11-15"
+    amountOwed: 4500
+    citedSection: "कलम 12A"
+    requiredAction: "30 दिवसांत भरणा करा."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
+- id: MR-BEN-02
+  lang: mr
+  text: "वाहतूक चलन: सिग्नल तोडल्याबद्दल 500 रुपये दंड. 60 दिवसांत ऑनलाइन भरणा करा. चलन क्रमांक C-8891, तारीख 10-09-2026. कलम 177. वाहतूक पोलीस विभागाने जारी केले."
+  expected_type: traffic_challan_summons
+  must_escalate: false
+  llm_fields:
+    issuingAuthority: "वाहतूक पोलीस"
+    deadlineDate: "2026-09-10"
+    amountOwed: 500
+    citedSection: "कलम 177"
+    requiredAction: "60 दिवसांत ऑनलाइन भरणा करा."
+  expected_grounded:
+    issuingAuthority: true
+    deadlineDate: true
+    amountOwed: true
+    citedSection: true
+    requiredAction: true
