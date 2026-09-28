@@ -8,7 +8,7 @@ AI-assisted govt/legal notice explainer (PS-06 AI for Bharat). Photo upload → 
 - Every explanation ends with the not-legal-advice disclaimer (`disclaimerIncluded` always true); escalated outputs also recommend seeing a lawyer.
 - System never files, responds to, pays, or resolves a notice; never claims certainty about legal outcomes.
 - Every stage logs keyed by `job_id` to an append-only audit store (inputs/outputs, model+prompt versions, rule-config version, decisions).
-- Q&A agent is sandboxed: 3 read-only tools, max 3 tool calls per question, max 10 questions per job, no escalation access.
+- Q&A agent is sandboxed: 4 read-only tools, max 3 tool calls per question, max 10 questions per job, no escalation access.
   Escalation flag is set BEFORE the agent runs and is never read or modified by it (test asserts flag identity before/after Q&A).
   Every answer ends with the disclaimer; out-of-scope questions are refused deterministically.
 
@@ -22,6 +22,7 @@ api/documents.py POST /{job_id}/ask
   → application/use_cases/answer_question.py (orchestration, no LangChain imports)
     → infrastructure/qa_agent.py (LangChain `create_agent`, v1.x API)
       → infrastructure/agent_tools.py (3 tools: search_notice, get_explanation, lookup_glossary)
+      → infrastructure/corpus_tool.py (4th tool: search_corpus, ADR 0004; deterministic Sources list, never model-cited)
 
 ## Verified thresholds and limits (LLD — these override any other numbers)
 

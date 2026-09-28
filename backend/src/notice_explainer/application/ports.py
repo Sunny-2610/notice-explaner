@@ -10,6 +10,7 @@ from typing import Protocol
 from ..domain.models import (
     AuditEntry,
     ClassificationResult,
+    CorpusChunk,
     EscalationResult,
     EscalationRule,
     ExplanationResult,
@@ -141,3 +142,18 @@ class LegalAidDirectory(Protocol):
     def lookup(
         self, state: str | None = None, district: str | None = None
     ) -> dict: ...
+
+
+class LegalRetriever(Protocol):
+    """Legal-corpus search behind the Q&A agent (ADR 0004)."""
+
+    def search(self, query: str, top_k: int = 3) -> list[CorpusChunk]: ...
+
+
+class MessagingChannel(Protocol):
+    """Outbound messaging (WhatsApp via Twilio, or fake in tests)."""
+
+    name: str
+
+    def send_message(self, to: str, body: str) -> None: ...
+    def download_media(self, url: str) -> bytes: ...

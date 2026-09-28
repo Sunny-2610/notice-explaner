@@ -70,6 +70,18 @@ class ExplanationResult:
 
 
 @dataclass
+class CorpusChunk:
+    """One reviewed (or pending-review) legal-guide chunk (ADR 0004)."""
+
+    id: str
+    title: str
+    lang: str
+    text: str
+    source_url: str | None = None
+    reviewed: bool = False
+
+
+@dataclass
 class ReviewCase:
     job_id: str
     routed_reason: ReviewReason
