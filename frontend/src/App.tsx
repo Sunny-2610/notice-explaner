@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BookOpen, Calendar, Camera, CheckCircle2, IndianRupee, Landmark, Upload } from 'lucide-react';
+import { BookOpen, Calendar, Camera, CheckCircle2, IndianRupee, Landmark, Upload, Languages, HelpCircle, ShieldCheck, FileText, QrCode } from 'lucide-react';
 import ReviewQueue from './components/ReviewQueue';
 import HowItWorks from './components/HowItWorks';
 import Faq from './components/Faq';
@@ -99,23 +99,31 @@ export default function App() {
       {!online && <div className="offline-banner">{t.offline}</div>}
 
       {/* Header: brand + always-visible language selector */}
-      <header className="border-b border-border">
-        <div className="mx-auto max-w-xl px-4 h-16 flex items-center justify-between">
-          <button onClick={() => setTab('explain')} className="text-lg font-bold">
-            Yojana Mitra
+      <header className="bg-white border-b border-border sticky top-0 z-50">
+        <div className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
+          <button onClick={() => setTab('explain')} className="flex items-center gap-3">
+             <div className="bg-primary text-white p-2 rounded-xl flex items-center justify-center">
+               <Landmark size={24} strokeWidth={2} />
+             </div>
+             <div className="flex flex-col text-left text-text-primary">
+               <span className="text-lg font-bold leading-tight">योजना मित्र / Yojana Mitra</span>
+               <span className="text-xs text-text-secondary hidden sm:block">नागरिक सेवा मंच • Citizen Portal</span>
+             </div>
           </button>
-          <div className="flex rounded-xl border-2 border-border overflow-hidden" role="group" aria-label={t.language}>
-            {(['hi', 'mr'] as Lang[]).map((l) => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className={`min-h-[48px] px-4 text-base font-medium ${
-                  lang === l ? 'bg-primary text-white' : 'bg-white text-text-secondary'
-                }`}
-              >
-                {l === 'hi' ? 'हिंदी' : 'मराठी'}
-              </button>
-            ))}
+          <nav className="hidden lg:flex items-center gap-6 font-medium text-sm text-text-secondary">
+            <button className="text-primary border-b-2 border-primary pb-1">योजनाएं</button>
+            <button className="hover:text-primary transition-colors">पात्रता जांचें</button>
+            <button className="hover:text-primary transition-colors">सहायता केंद्र</button>
+          </nav>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setLang(lang === 'hi' ? 'mr' : 'hi')} className="flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-gray-50 transition-colors text-sm font-medium text-text-primary">
+              <Languages size={18} className="text-primary" />
+              <span>{lang === 'hi' ? 'हिंदी / मराठी' : 'मराठी / हिंदी'}</span>
+            </button>
+            <button onClick={() => setTab('review')} className="hidden sm:flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+              <HelpCircle size={18} />
+              <span>समीक्षक लॉगिन</span>
+            </button>
           </div>
         </div>
       </header>
@@ -129,10 +137,16 @@ export default function App() {
           <Faq lang={lang} />
         ) : (
           <>
-            {/* Compact hero — above the fold on mobile */}
-            <section className="pt-8 pb-6 text-center">
-              <h1 className="text-2xl font-bold">{t.heroTitle}</h1>
-              <p className="mt-1 text-sm text-text-secondary">{t.heroSub}</p>
+            {/* Updated Hero Section */}
+            <section className="pt-10 pb-8 text-center flex flex-col items-center">
+              <div className="bg-[#E6F7F4] text-teal-700 rounded-full px-4 py-1 flex items-center gap-2 text-sm font-medium mb-6">
+                <span className="bg-teal-500 rounded-full w-2 h-2 inline-block"></span>
+                विश्वसनीय नागरिक सहायता मंच • AI एवं विशेषज्ञ समीक्षक आधारित
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold text-[#111827]">सरकारी नोटिस या योजना पत्र समझने में मदद</h1>
+              <p className="mt-4 text-base md:text-lg text-text-secondary max-w-2xl mx-auto">
+                अपने कागज़ात, सरकारी चिट्ठी या योजना फॉर्म की तस्वीर अपलोड करें या सीधे बोलकर सरल हिंदी में अपनी भाषा में सही और स्पष्ट जानकारी प्राप्त करें।
+              </p>
             </section>
 
             {/* Camera and voice are equal-weight peers — no "or" divider demoting voice.
@@ -174,22 +188,55 @@ export default function App() {
                 </div>
                 {/* Desktop: upload-first peer grid (QR-to-mobile flow intentionally
                     omitted — no shareable-link scheme exists yet). */}
-                <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6">
-                  <div className="camera-card cursor-default">
-                    <div className="camera-icon text-text-secondary" aria-hidden>
-                      <Upload size={48} strokeWidth={1.75} />
+                <div className="hidden lg:grid lg:grid-cols-2 lg:gap-8 max-w-5xl mx-auto">
+                  
+                  {/* Left Column - Upload */}
+                  <div className="flex flex-col gap-4">
+                    <div className="camera-card cursor-default border-dashed border-gray-300 bg-white shadow-sm p-8 flex flex-col items-center flex-grow justify-center relative">
+                      <div className="bg-primary-light p-4 rounded-xl mb-4">
+                        <Upload size={32} strokeWidth={2} className="text-primary" />
+                      </div>
+                      <h3 className="text-xl font-bold text-text-primary mb-2">नोटिस की फोटो अपलोड करें</h3>
+                      <p className="text-sm text-text-secondary mb-4 text-center">कागज़ात, सरकारी चिट्ठी या योजना फॉर्म की साफ़ तस्वीर चुनें</p>
+                      
+                      <div className="bg-gray-50 flex items-center gap-2 px-3 py-1.5 rounded-md mb-6 border border-gray-100 text-xs text-text-secondary">
+                        <FileText size={14} /> JPG, PNG या PDF • 10MB तक
+                      </div>
+
+                      <button
+                        onClick={() => desktopFileRef.current?.click()}
+                        className="btn-primary flex items-center gap-2 w-full max-w-[240px] justify-center shadow-md shadow-primary/20"
+                        disabled={busy}
+                      >
+                        <Upload size={18} /> फ़ाइल चुनें
+                      </button>
+                      <p className="mt-6 text-sm text-text-secondary">या फ़ाइल यहाँ खींचकर छोड़ें (Drag & Drop)</p>
                     </div>
-                    <h3 className="camera-title">{t.desktopUploadTitle}</h3>
-                    <p className="camera-subtitle">{t.desktopUploadSub}</p>
-                    <button
-                      onClick={() => desktopFileRef.current?.click()}
-                      className="btn-primary mt-2"
-                      disabled={busy}
-                    >
-                      {t.useUpload}
+                    
+                    <button onClick={() => setShowCamera(true)} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between text-text-primary hover:bg-gray-50 transition-colors shadow-sm font-medium group">
+                       <span className="flex items-center gap-3">
+                         <QrCode className="text-text-primary" size={20} />
+                         या अपने फ़ोन से स्कैन करें
+                       </span>
+                       <span className="text-gray-400 group-hover:text-primary transition-colors text-xl">→</span>
                     </button>
                   </div>
+
+                  {/* Right Column - Voice */}
                   <VoiceRecorder jobId={jobId} lang={lang} variant="hero" onTranscript={setPendingQuestion} />
+                </div>
+                
+                {/* Featues row below hero */}
+                <div className="hidden lg:grid grid-cols-3 gap-6 max-w-5xl mx-auto mt-8 mb-6">
+                   <div className="feature-chip text-text-primary">
+                      <ShieldCheck className="text-blue-500" size={20} /> 100% सुरक्षित एवं निजी
+                   </div>
+                   <div className="feature-chip text-text-primary">
+                      <FileText className="text-indigo-500" size={20} /> सरल कानूनी भाषा
+                   </div>
+                   <div className="feature-chip text-text-primary">
+                      <HelpCircle className="text-primary" size={20} /> समीक्षक सहायता
+                   </div>
                 </div>
               </>
             )}
@@ -382,40 +429,48 @@ export default function App() {
               </section>
             )}
 
-            {/* Disclaimer: quiet, always visible — sticky once a job exists
-                so it's never hidden behind a scroll (design v2 §2) */}
+            {/* New Dark Disclaimer Banner */}
             <div
-              className={
-                jobId
-                  ? 'disclaimer disclaimer-sticky mt-6 lg:max-w-3xl lg:mx-auto'
-                  : 'disclaimer mt-6'
-              }
+              className={`bg-[#202735] text-white rounded-xl p-4 flex items-center justify-between gap-4 mt-8 ${jobId ? 'disclaimer-sticky lg:max-w-5xl lg:mx-auto' : 'max-w-5xl mx-auto'}`}
             >
-              {t.disclaimer}
+              <div className="flex items-start md:items-center gap-3">
+                 <ShieldCheck size={24} className="text-orange-400 shrink-0" />
+                 <p className="text-sm md:text-sm text-gray-200">
+                    <span className="text-orange-400 font-bold">नागरिक सूचना:</span> योजना मित्र केवल सरकारी नोटिस समझने में मदद करता है। यह आधिकारिक सरकारी आदेश नहीं है। आवश्यकता पड़ने पर संबंधित कार्यालय से संपर्क करें।
+                 </p>
+              </div>
+              <button className="bg-gray-700/50 hover:bg-gray-600 transition-colors text-white px-4 py-2 rounded-lg text-sm font-medium shrink-0 flex items-center gap-1">
+                 समझ गया <CheckCircle2 size={16} />
+              </button>
             </div>
           </>
         )}
       </main>
 
-      {/* Footer: secondary nav + reviewer surface */}
-      <footer className="border-t border-border">
-        <nav className="mx-auto max-w-xl px-4 py-2 flex justify-center gap-1">
-          {(
-            [
-              ['how', lang === 'mr' ? 'कसे काम करते' : 'कैसे काम करता है'],
-              ['faq', 'FAQ'],
-              ['review', t.reviewer],
-            ] as [Tab, string][]
-          ).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`nav-link text-sm ${tab === key ? 'nav-link-active' : ''}`}
-            >
-              {label}
+      {/* Minimal Footer */}
+      <footer className="mt-auto py-6 border-t border-border bg-[#F8F9FB]">
+        <div className="mx-auto max-w-7xl px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <nav className="flex flex-wrap justify-center md:justify-start gap-4 lg:gap-8">
+            <button onClick={() => setTab('how')} className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+              कैसे काम करता है
             </button>
-          ))}
-        </nav>
+            <button onClick={() => setTab('faq')} className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+              FAQ
+            </button>
+            <button onClick={() => setTab('review')} className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+              समीक्षक लॉगिन
+            </button>
+            <button className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+              गोपनीयता नीति
+            </button>
+            <button className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+              नागरिक चार्टर
+            </button>
+          </nav>
+          <div className="text-sm text-text-muted text-center md:text-right">
+             © 2024 योजना मित्र (Yojana Mitra) • नागरिक सेवा मंच. सर्वाधिकार सुरक्षित.
+          </div>
+        </div>
       </footer>
     </div>
   );

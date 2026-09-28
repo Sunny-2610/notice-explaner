@@ -26,7 +26,7 @@
     @apply bg-primary text-white rounded-xl min-h-[48px] px-6 py-3 font-medium active:bg-primary-hover transition-colors;
   }
   .btn-secondary {
-    @apply bg-white text-text-primary rounded-xl min-h-[48px] px-6 py-3 border-2 border-border font-medium active:bg-surface;
+    @apply bg-white text-text-primary rounded-xl min-h-[48px] px-6 py-3 border-2 border-border font-medium active:bg-white;
   }
   .btn-danger {
     @apply bg-error text-white rounded-xl min-h-[48px] px-6 py-3 font-medium active:bg-red-700 transition-colors;
@@ -42,10 +42,10 @@
   }
 
   .card {
-    @apply bg-surface-elevated rounded-xl border border-border p-5;
+    @apply bg-white rounded-xl border border-border p-5;
   }
   .card-elevated {
-    @apply bg-surface-elevated rounded-xl shadow-sm border border-border p-6;
+    @apply bg-white rounded-xl shadow-sm border border-border p-6;
   }
 
   /* Semantic chips that carry meaning */
@@ -55,8 +55,21 @@
   .chip-error { @apply bg-error-bg text-error rounded-full px-3 py-1 text-xs font-medium; }
 
   /* Camera hero card: large, inviting, obvious */
+  
+  .feature-chip {
+    @apply flex items-center justify-center gap-2 border border-border rounded-xl p-4 bg-white shadow-sm font-medium text-sm text-text-primary;
+  }
+  .mic-button-hero {
+    @apply relative flex items-center justify-center w-32 h-32 rounded-full;
+    background: radial-gradient(circle, rgba(97,58,245,1) 0%, rgba(97,58,245,0.7) 40%, rgba(97,58,245,0.1) 70%, transparent 100%);
+  }
+  .mic-icon-inner {
+    @apply w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center shadow-lg;
+  }
+
   .camera-card {
-    @apply w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-gray-300 bg-surface flex flex-col items-center justify-center gap-3 active:bg-gray-100 transition-colors min-h-[48px];
+
+    @apply w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-gray-300 bg-white flex flex-col items-center justify-center gap-3 active:bg-gray-100 transition-colors min-h-[48px];
   }
   .camera-icon { @apply text-6xl; }
   .camera-title { @apply text-xl font-semibold text-text-primary; }
@@ -123,7 +136,7 @@
   /* Voice CTA as a true peer of the camera CTA (equal visual mass).
      Applied only via variant="hero" from the home screen. */
   .voice-card-hero {
-    @apply w-full rounded-2xl border-2 border-border bg-surface flex flex-col items-center justify-center gap-3 p-6 min-h-[300px];
+    @apply w-full rounded-2xl border-2 border-border bg-white flex flex-col items-center justify-center gap-3 p-6 min-h-[300px];
   }
 
   /* Skeleton loaders */

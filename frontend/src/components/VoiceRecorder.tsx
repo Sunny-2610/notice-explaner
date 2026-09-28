@@ -55,7 +55,7 @@ export default function VoiceRecorder({
     setRecording(false);
     if (timerRef.current) clearInterval(timerRef.current);
     cancelAnimationFrame(rafRef.current);
-    ctxRef.current?.close().catch(() => {});
+    ctxRef.current?.close().catch(() => { });
     ctxRef.current = null;
     recRef.current?.stop();
     recRef.current?.stream.getTracks().forEach((tr) => tr.stop());
@@ -108,10 +108,41 @@ export default function VoiceRecorder({
   );
 
   return (
-    <div className={`${variant === 'hero' ? 'voice-card-hero' : 'card'} text-center`}>
-      <p className="text-base font-semibold text-text-primary inline-flex items-center gap-2">
-        <Mic size={20} strokeWidth={1.75} aria-hidden /> {t.voiceTitle}
-      </p>
+    <div className={`${variant === 'hero' ? 'bg-white border border-border shadow-sm rounded-2xl flex flex-col items-center justify-center p-8 min-h-[460px] max-w-sm mx-auto w-full relative' : 'card text-center'}`}>
+      {variant === 'hero' && (
+        <div className="absolute top-6 bg-primary-light text-primary font-medium text-xs px-4 py-1.5 rounded-full flex items-center gap-2">
+          <Mic size={14} /> तुरंत सहायता / Instant Voice Assistant
+        </div>
+      )}
+      {variant === 'hero' ? (
+        <>
+          <div className="mt-8 mb-6 mic-button-hero">
+            <div className="mic-icon-inner">
+              <Mic size={28} />
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold text-text-primary mb-6">बोलकर पूछें</h3>
+          <div className="flex gap-1 justify-center mb-8 h-4 items-center">
+            <div className="w-1.5 h-full bg-primary rounded-full"></div>
+            <div className="w-1.5 h-1/2 bg-primary/70 rounded-full"></div>
+            <div className="w-1.5 h-full bg-primary rounded-full"></div>
+            <div className="w-1.5 h-full bg-primary rounded-full"></div>
+            <div className="w-1.5 h-1/2 bg-primary/70 rounded-full"></div>
+            <div className="w-1.5 h-full bg-primary rounded-full"></div>
+          </div>
+
+          <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 w-full mb-6">
+            <p className="text-xs font-semibold text-text-primary flex items-center gap-2 mb-2">
+              <MessageCircle size={14} className="text-primary" /> आप ऐसा पूछ सकते हैं:
+            </p>
+            <p className="text-sm text-text-secondary italic">"मुझे राशन कार्ड का नोटिस मिला है, क्या करना चाहिए?"<br />"किसान योजना की स्थिति बताएं"</p>
+          </div>
+        </>
+      ) : (
+        <p className="text-base font-semibold text-text-primary inline-flex items-center gap-2">
+          <Mic size={20} strokeWidth={1.75} aria-hidden /> {t.voiceTitle}
+        </p>
+      )}
       {recording ? (
         <div className="mt-3 space-y-3">
           <div className="flex items-end justify-center gap-1 h-12" aria-hidden>
@@ -127,22 +158,27 @@ export default function VoiceRecorder({
           </button>
         </div>
       ) : (
-        <button
-          onPointerDown={() => void start()}
-          onPointerUp={stop}
-          onPointerCancel={stop}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-              e.preventDefault();
-              if (recording) stop();
-              else void start();
-            }
-          }}
-          style={{ touchAction: 'none' }}
-          className="btn-secondary w-full mt-3"
-        >
-          {t.voiceHold}
-        </button>
+        <>
+          <button
+            onPointerDown={() => void start()}
+            onPointerUp={stop}
+            onPointerCancel={stop}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                if (recording) stop();
+                else void start();
+              }
+            }}
+            style={{ touchAction: 'none' }}
+            className={`btn-primary w-full shadow-lg shadow-primary/20 flex justify-center items-center gap-2 text-base ${variant === 'hero' ? 'bg-primary-light !text-primary hover:bg-primary hover:!text-white' : 'mt-3'}`}
+          >
+            <Mic size={20} /> बोलने के लिए दबाकर रखें (Hold to Speak)
+          </button>
+          {variant === 'hero' && (
+            <p className="mt-4 text-xs text-text-muted">हिंदी • मराठी • English सपोर्ट उपलब्ध</p>
+          )}
+        </>
       )}
       {!jobId && !recording && <p className="mt-2 text-xs text-text-muted">{t.voiceFirst}</p>}
       {transcription ? (
