@@ -33,7 +33,11 @@ def create_app() -> FastAPI:
     def health() -> dict:
         from .api import deps as _deps
 
-        return {"ok": True, "aiMode": _deps.AI_MODE}
+        return {
+            "ok": True,
+            "aiMode": _deps.AI_MODE,
+            "voiceEnabled": type(_deps.voice_service).__name__ != "FakeVoiceService",
+        }
 
     return app
 
