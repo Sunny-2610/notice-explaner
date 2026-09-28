@@ -8,3 +8,5 @@ node_modules/
 dist/
 # env
 .env
+# eval reports (generated)
+backend/evals/report.md
