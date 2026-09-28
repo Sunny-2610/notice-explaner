@@ -14,6 +14,7 @@ import os
 from fastapi import Header, HTTPException
 
 from ..infrastructure.escalation import YamlEscalationEvaluator
+from ..infrastructure.grounding import GroundedFieldExtractor
 from ..infrastructure.fake_ai import (
     FakeClassifier,
     FakeExplanationGenerator,
@@ -86,6 +87,9 @@ else:
     field_extractor = _reasoner  # type: ignore[assignment]
     explanation_gen = _reasoner  # type: ignore[assignment]
     AI_MODE = "gemini"
+
+# Grounding wrapper (pure re-score, no process_job.py change) for both modes.
+field_extractor = GroundedFieldExtractor(field_extractor)  # type: ignore[assignment]
 
 if os.getenv("BHASHINI_API_KEY") and not USE_FAKE:
     from ..infrastructure.bhashini import BhashiniVoiceService
