@@ -1,14 +1,20 @@
-"""LangChain ReAct Q&A agent (ADR 0003).
+"""LangChain ReAct Q&A agent (ADR 0003, ADR 0004).
 
-Sandboxed: 3 read-only tools, max 3 tool calls per question (call budget +
+Sandboxed: 4 read-only tools, max 3 tool calls per question (call budget +
 recursion_limit), deterministic out-of-scope refusal BEFORE any LLM call,
-disclaimer appended to EVERY response, graceful fallback that never fails
-the request. The agent has no escalation access whatsoever.
+deterministic Sources list built only from retrieved chunks (never trusted
+from the model), disclaimer appended to EVERY response, graceful fallback
+that never fails the request. The agent has no escalation access whatsoever.
 """
 from __future__ import annotations
 
+import logging
+import os
+
 from langchain.agents import create_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
+
+logger = logging.getLogger(__name__)
 
 from .agent_tools import (
     DISCLAIMERS,
@@ -18,6 +24,7 @@ from .agent_tools import (
     make_glossary_tool,
     make_search_notice_tool,
 )
+from .corpus_tool import make_search_corpus_tool
 
 SYSTEM_PROMPT = """
 You are a helpful assistant for Yojana Mitra, an Indian government notice explainer.
@@ -29,7 +36,9 @@ RULES:
    "मैं केवल इस नोटिस के बारे में सवालों का जवाब दे सकता हूँ। / I can only answer questions about this notice."
 2. Never claim certainty about legal outcomes.
 3. Never say "you don't need a lawyer."
-4. Use the tools provided. If you don't know, say so.
+4. Use the tools provided. Only claim what the notice, explanation,
+   glossary, or corpus tools returned. If the corpus has nothing relevant,
+   say so plainly instead of inventing an answer.
 5. Respond in the user's target language (Hindi or Marathi).
 6. End EVERY response with the disclaimer for the target language.
 
@@ -49,14 +58,23 @@ MAX_TOOL_CALLS = 3
 
 
 class QAAgent:
-    def __init__(self):
+    def __init__(self, retriever=None):
         self._llm = None
+        self._retriever = retriever
+
+    def _get_retriever(self):
+        if self._retriever is None:
+            from .retrieval import build_default_retriever
+
+            self._retriever = build_default_retriever()
+        return self._retriever
 
     def _get_llm(self):
         if self._llm is None:
             self._llm = ChatGoogleGenerativeAI(
-                model="gemini-2.0-flash",
+                model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
                 temperature=0.2,
+                google_api_key=os.getenv("GEMINI_API_KEY"),
             )
         return self._llm
 
@@ -68,11 +86,12 @@ class QAAgent:
             return f"{REFUSALS.get(target_language, REFUSALS['en'])}\n\n{disclaimer}"
 
         try:
-            budget = {"used": 0, "max": MAX_TOOL_CALLS}
+            budget: dict = {"used": 0, "max": MAX_TOOL_CALLS, "sources": []}
             tools = [
                 make_search_notice_tool(notice_text, budget),
                 make_get_explanation_tool(explanation, budget),
                 make_glossary_tool(budget),
+                make_search_corpus_tool(self._get_retriever(), budget),
             ]
             agent = create_agent(
                 model=self._get_llm(),
@@ -87,10 +106,23 @@ class QAAgent:
             if not isinstance(answer, str):
                 answer = str(answer)
 
+            # Deterministic Sources list from retrieved chunks only — never
+            # trust the model to cite. Placed BEFORE the disclaimer.
+            sources = budget.get("sources", [])
+            if sources:
+                lines = ["Sources:"]
+                for s in sources:
+                    if s.get("source_url"):
+                        lines.append(f"- {s['title']} ({s['source_url']})")
+                    else:
+                        lines.append(f"- {s['title']}")
+                answer = answer.rstrip() + "\n\n" + "\n".join(lines)
             if disclaimer not in answer:
                 answer = answer.rstrip() + f"\n\n{disclaimer}"
             return answer
-        except Exception:
-            # Fallback: never fail the request (E-302 spirit).
+        except Exception as exc:
+            # Fallback: never fail the request (E-302 spirit). Log the error
+            # type only — never the user question text.
+            logger.warning("qa_agent failed: %s", type(exc).__name__)
             fb = FALLBACK.get(target_language, FALLBACK["en"])
             return f"{fb}\n\n{disclaimer}"

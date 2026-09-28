@@ -4,6 +4,7 @@ services:
     runtime: python
     plan: free
     rootDir: backend
+    # Real Q&A agent (LangChain) needs the qa extra: pip install ".[qa]"
     buildCommand: pip install .
     startCommand: PYTHONPATH=src uvicorn notice_explainer.main:app --host 0.0.0.0 --port $PORT
     envVars:
