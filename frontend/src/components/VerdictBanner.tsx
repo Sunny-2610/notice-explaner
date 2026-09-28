@@ -7,7 +7,7 @@ export default function VerdictBanner({ escalated, lang }: { escalated: boolean;
     <div className={`verdict ${escalated ? 'verdict-danger' : 'verdict-safe'}`} role="alert">
       {escalated ? (
         <span className="verdict-icon-danger" aria-hidden>
-          <AlertTriangle size={28} strokeWidth={1.75} />
+          <AlertTriangle size={24} strokeWidth={1.75} />
         </span>
       ) : (
         <span className="verdict-icon-safe" aria-hidden>
@@ -15,7 +15,11 @@ export default function VerdictBanner({ escalated, lang }: { escalated: boolean;
         </span>
       )}
       <div>
-        {escalated && <span className="verdict-lawyer-chip">{t.seeLawyerChip}</span>}
+        {escalated && (
+          <span className="inline-block rounded-full bg-white px-3 py-1 text-xs font-medium text-[#7F1D1D]">
+            {t.verdictEscalatedChip}
+          </span>
+        )}
         <h2 className={`verdict-title ${escalated ? 'mt-2' : ''}`}>
           {escalated ? t.verdictDanger : t.verdictSafe}
         </h2>

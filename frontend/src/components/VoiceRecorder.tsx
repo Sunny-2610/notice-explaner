@@ -1,10 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-import { MessageCircle, Mic, Square } from 'lucide-react';
+import { MessageCircle, Mic } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 import { queryVoice } from '../lib/voice';
 
-/** Push-to-talk with live waveform. Needs a jobId — stashes audio until one exists. */
-export default function VoiceRecorder({ jobId, lang }: { jobId: string | null; lang: Lang }) {
+/** Push-to-talk with live waveform. Needs a jobId — stashes audio until one exists.
+ * `variant="hero"` swaps the outer card to match camera-card's visual mass;
+ * internal recording logic is identical in both variants. */
+export default function VoiceRecorder({
+  jobId,
+  lang,
+  variant = 'default',
+}: {
+  jobId: string | null;
+  lang: Lang;
+  variant?: 'default' | 'hero';
+}) {
   const t = STRINGS[lang];
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -93,7 +103,7 @@ export default function VoiceRecorder({ jobId, lang }: { jobId: string | null; l
   );
 
   return (
-    <div className="voice-peer-card text-center">
+    <div className={`${variant === 'hero' ? 'voice-card-hero' : 'card'} text-center`}>
       <p className="text-base font-semibold text-text-primary inline-flex items-center gap-2">
         <Mic size={20} strokeWidth={1.75} aria-hidden /> {t.voiceTitle}
       </p>
@@ -107,8 +117,8 @@ export default function VoiceRecorder({ jobId, lang }: { jobId: string | null; l
           <p className="text-sm text-text-secondary tabular-nums">
             00:{seconds.toString().padStart(2, '0')}
           </p>
-          <button onClick={stop} className="btn-danger w-full inline-flex items-center justify-center gap-2">
-            <Square size={18} strokeWidth={1.75} aria-hidden /> {t.voiceStop}
+          <button onClick={stop} className="btn-danger w-full">
+            {t.voiceStop}
           </button>
         </div>
       ) : (
@@ -124,9 +134,9 @@ export default function VoiceRecorder({ jobId, lang }: { jobId: string | null; l
             }
           }}
           style={{ touchAction: 'none' }}
-          className="btn-primary w-full mt-3 inline-flex items-center justify-center gap-2"
+          className="btn-secondary w-full mt-3"
         >
-          <Mic size={20} strokeWidth={1.75} aria-hidden /> {t.voiceHold}
+          {t.voiceHold}
         </button>
       )}
       {!jobId && !recording && <p className="mt-2 text-xs text-text-muted">{t.voiceFirst}</p>}

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, CalendarClock, FileText } from 'lucide-react';
+import { AlertTriangle, Calendar, FileText } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
 /** Split a wall of explanation text into ~3 chronological beats. */
@@ -13,7 +13,7 @@ function toBeats(text: string): string[] {
   return [0, 1, 2].map((i) => parts.slice(i * size, (i + 1) * size).join(' ')).filter(Boolean);
 }
 
-const ICONS = [FileText, CalendarClock, AlertTriangle];
+const ICONS = [FileText, Calendar, AlertTriangle];
 
 export default function ProgressiveExplanation({ text, lang }: { text: string; lang: Lang }) {
   const t = STRINGS[lang];

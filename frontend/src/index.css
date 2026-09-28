@@ -69,26 +69,18 @@
      outline icon, no accent bar). */
   .verdict { @apply flex gap-4 p-5 rounded-xl; }
   .verdict-danger {
-    @apply bg-escalate-bg border-2 border-escalate-border rounded-xl;
-    border-left-width: 4px;
-    border-left-color: #7F1D1D;
+    @apply bg-error-bg border-2 rounded-xl;
+    border-color: #DC2626;
+    border-left: 4px solid #7F1D1D;
   }
   .verdict-safe {
-    @apply bg-success-bg border-success-border rounded-xl;
-    border-width: 1px;
+    @apply bg-success-bg border rounded-xl;
+    border-color: #BBF7D0;
   }
   .verdict-icon-danger {
-    @apply shrink-0 flex items-center justify-center rounded-full text-white;
-    background-color: #7F1D1D;
-    width: 48px;
-    height: 48px;
+    @apply shrink-0 flex items-center justify-center rounded-full bg-error text-white p-3;
   }
   .verdict-icon-safe { @apply shrink-0 text-success; }
-  .verdict-lawyer-chip {
-    @apply inline-block rounded-full bg-white px-3 py-1 text-xs font-semibold;
-    color: #7F1D1D;
-    border: 1px solid #7F1D1D;
-  }
   .verdict-title { @apply text-xl font-bold; }
   .verdict-danger .verdict-title { @apply text-red-700; }
   .verdict-safe .verdict-title { @apply text-green-700; }
@@ -114,11 +106,7 @@
   .field-icon { @apply text-text-secondary shrink-0 flex items-center; }
   .field-label { @apply text-xs text-text-muted; }
   .field-value { @apply text-base font-medium text-text-primary; }
-  /* Confidence trust signal: always-visible filled circle, never emoji */
-  .conf-dot { @apply inline-block rounded-full shrink-0; width: 12px; height: 12px; }
-  .conf-dot-high { background-color: #16A34A; }
-  .conf-dot-medium { background-color: #EA580C; }
-  .conf-dot-low { background-color: #DC2626; }
+  /* Confidence detail sentence revealed on tap (dot itself is inline-styled) */
   .conf-sentence { @apply pb-3 pl-11 text-sm text-text-secondary; }
 
   /* Disclaimer: quiet but always at the bottom */
@@ -132,9 +120,10 @@
     z-index: 10;
   }
 
-  /* Voice CTA as a true peer of the camera CTA (equal visual mass) */
-  .voice-peer-card {
-    @apply w-full rounded-2xl border-2 border-border bg-surface flex flex-col items-center justify-center gap-3 p-6 min-h-[48px];
+  /* Voice CTA as a true peer of the camera CTA (equal visual mass).
+     Applied only via variant="hero" from the home screen. */
+  .voice-card-hero {
+    @apply w-full rounded-2xl border-2 border-border bg-surface flex flex-col items-center justify-center gap-3 p-6 min-h-[300px];
   }
 
   /* Skeleton loaders */

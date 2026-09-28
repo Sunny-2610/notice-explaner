@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchResult, type DocumentResult } from '../lib/api';
 
 const TERMINAL = new Set(['completed', 'awaiting_review', 'failed']);
@@ -11,13 +11,6 @@ export function useJobPoll(jobId: string | null) {
   const [result, setResult] = useState<DocumentResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [timedOut, setTimedOut] = useState(false);
-  const [round, setRound] = useState(0);
-
-  const retry = useCallback(() => {
-    setError(null);
-    setTimedOut(false);
-    setRound((r) => r + 1);
-  }, []);
 
   useEffect(() => {
     if (!jobId) return;
@@ -43,7 +36,7 @@ export function useJobPoll(jobId: string | null) {
     return () => {
       stop = true;
     };
-  }, [jobId, round]);
+  }, [jobId]);
 
-  return { result, error, timedOut, retry };
+  return { result, error, timedOut };
 }

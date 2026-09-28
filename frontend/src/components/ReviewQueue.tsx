@@ -10,51 +10,44 @@ import {
 } from '../lib/review';
 import { STRINGS, type Lang } from '../i18n/strings';
 
-/** Human labels for known audit-output keys; anything else falls back to raw. */
+/** Human labels for known audit-output keys. Entries with no recognized
+ * keys fall back to truncated raw JSON in the same row structure. */
 const OUTPUT_LABELS: Record<string, string> = {
   confidence: 'confidence',
-  provider: 'provider',
   documentType: 'document type',
-  fields: 'fields',
   escalate: 'escalate',
   rules: 'matched rules',
-  matchedRuleIds: 'matched rules',
   version: 'rules version',
-  rules_version: 'rules version',
-  disclaimer: 'disclaimer included',
+  disclaimer: 'disclaimer',
   voiceAvailable: 'voice available',
-  reason: 'reason',
-  error: 'error',
-  answer: 'answer',
 };
 
-function formatValue(key: string, value: unknown): string {
+function formatValue(value: unknown): string {
   if (Array.isArray(value)) return value.length ? value.join(', ') : '—';
   if (typeof value === 'boolean') return value ? 'true' : 'false';
   if (value == null) return '—';
   if (typeof value === 'object') return JSON.stringify(value);
   const s = String(value);
-  if ((key === 'fields' || key === 'answer') && s.length > 300) return `${s.slice(0, 300)}…`;
-  return s;
+  return s.length > 200 ? `${s.slice(0, 200)}…` : s;
 }
 
 function AuditStage({ entry }: { entry: AuditEntry }) {
   const output = (entry.output ?? {}) as Record<string, unknown>;
   const keys = Object.keys(output);
+  const recognized = keys.filter((k) => k in OUTPUT_LABELS);
+  const rows: Array<[string, string]> =
+    recognized.length > 0
+      ? recognized.map((k) => [OUTPUT_LABELS[k], formatValue(output[k])])
+      : [['output', JSON.stringify(output)?.slice(0, 200) ?? '—']];
   return (
-    <li className="p-2 bg-surface rounded-md border border-border text-sm">
-      <p className="font-mono font-semibold text-text-primary">{entry.stage}</p>
-      {keys.length === 0 && <p className="text-text-muted">—</p>}
-      <dl>
-        {keys.map((k) => (
-          <div key={k} className="grid grid-cols-[140px_1fr] gap-2 py-0.5">
-            <dt className="text-text-secondary">{OUTPUT_LABELS[k] ?? k}</dt>
-            <dd className="text-text-primary break-words font-mono text-[13px]">
-              {formatValue(k, output[k])}
-            </dd>
-          </div>
-        ))}
-      </dl>
+    <li className="p-2 bg-surface rounded-md border border-border">
+      <p className="font-mono font-semibold text-text-primary text-sm">{entry.stage}</p>
+      {rows.map(([label, value]) => (
+        <div key={label} className="flex justify-between gap-2 text-sm">
+          <span className="text-text-muted shrink-0">{label}</span>
+          <span className="font-mono text-right break-words">{value}</span>
+        </div>
+      ))}
     </li>
   );
 }
@@ -69,7 +62,7 @@ export default function ReviewQueue({ lang }: { lang: Lang }) {
   const [result, setResult] = useState<DocumentResult | null>(null);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [decision, setDecision] = useState<Decision | null>(null);
-  const [finalText, setFinalText] = useState('');
+  const [editText, setEditText] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,7 +96,7 @@ export default function ReviewQueue({ lang }: { lang: Lang }) {
   const open = async (jobId: string) => {
     setSelected(jobId);
     setDecision(null);
-    setFinalText('');
+    setEditText('');
     setResult(await fetchResult(jobId));
     setAudit(await fetchAudit(jobId));
   };
@@ -113,14 +106,14 @@ export default function ReviewQueue({ lang }: { lang: Lang }) {
     setResult(null);
     setAudit([]);
     setDecision(null);
-    setFinalText('');
+    setEditText('');
   };
 
-  const decide = async (d: Decision) => {
+  const decide = async (d: Decision, finalText?: string) => {
     if (!selected || busy) return;
     setBusy(true);
     try {
-      await resolveReview(selected, d, d === 'edit' ? finalText : undefined);
+      await resolveReview(selected, d, finalText);
       close();
       await refresh();
     } catch (e) {
@@ -140,13 +133,13 @@ export default function ReviewQueue({ lang }: { lang: Lang }) {
       if (k === 'a') void decide('approve');
       else if (k === 'e') {
         setDecision('edit');
-        setFinalText((prev) => prev || result?.explanation || '');
+        setEditText((prev) => prev || result?.explanation || '');
       } else if (k === 'r') void decide('reject');
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected, busy, finalText, result]);
+  }, [selected, busy, editText, result]);
 
   return (
     <section className="pt-8 space-y-4 max-w-2xl mx-auto">
@@ -217,18 +210,17 @@ export default function ReviewQueue({ lang }: { lang: Lang }) {
               </label>
               <textarea
                 id="review-final-text"
-                value={finalText}
-                onChange={(e) => setFinalText(e.target.value)}
-                rows={6}
-                className="w-full min-h-[48px] rounded-xl border-2 border-border px-4 py-3 text-base bg-white"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                className="w-full min-h-[160px] rounded-xl border-2 border-border p-3 text-base bg-white"
               />
               <div className="flex gap-2">
                 <button
-                  onClick={() => decide('edit')}
-                  disabled={busy || !finalText.trim()}
+                  onClick={() => decide('edit', editText)}
+                  disabled={busy || !editText.trim()}
                   className="btn-primary flex-1 inline-flex items-center justify-center gap-2 disabled:opacity-40"
                 >
-                  <Check size={18} strokeWidth={1.75} aria-hidden /> Save edit
+                  <Check size={18} strokeWidth={1.75} aria-hidden /> Save &amp; Approve
                 </button>
                 <button onClick={() => setDecision(null)} className="btn-secondary flex-1">
                   Cancel
@@ -247,7 +239,7 @@ export default function ReviewQueue({ lang }: { lang: Lang }) {
               <button
                 onClick={() => {
                   setDecision('edit');
-                  setFinalText(result.explanation || '');
+                  setEditText(result.explanation || '');
                 }}
                 disabled={busy}
                 className="btn-secondary flex-1 inline-flex items-center justify-center gap-2 disabled:opacity-40"

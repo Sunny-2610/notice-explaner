@@ -1,10 +1,10 @@
-import { BookOpen, Check, Circle, ClipboardList, Loader2, MessagesSquare, ShieldCheck, Tag } from 'lucide-react';
+import { BookOpen, CheckCircle2, Circle, FileText, Loader2, MessagesSquare, ShieldCheck, Tag } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
 const STAGES = [
   { key: 'extracting', Icon: BookOpen },
   { key: 'classifying', Icon: Tag },
-  { key: 'extracting_fields', Icon: ClipboardList },
+  { key: 'extracting_fields', Icon: FileText },
   { key: 'generating_explanation', Icon: MessagesSquare },
   { key: 'checking_escalation', Icon: ShieldCheck },
 ] as const;
@@ -43,7 +43,7 @@ export default function ProcessingStages({ status, lang }: { status: string; lan
           <div key={stage.key} className={cls}>
             <span aria-hidden>
               {done ? (
-                <Check size={20} strokeWidth={1.75} />
+                <CheckCircle2 size={20} strokeWidth={1.75} />
               ) : active ? (
                 <Loader2 size={20} strokeWidth={1.75} className="animate-spin" />
               ) : (

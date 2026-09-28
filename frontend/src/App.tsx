@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Banknote, BookOpen, CalendarDays, Camera, CheckCircle2, Landmark } from 'lucide-react';
+import { BookOpen, Calendar, Camera, CheckCircle2, IndianRupee, Landmark, Upload } from 'lucide-react';
 import ReviewQueue from './components/ReviewQueue';
 import HowItWorks from './components/HowItWorks';
 import Faq from './components/Faq';
@@ -40,8 +40,9 @@ export default function App() {
   const [showCamera, setShowCamera] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
   const fileRef = useRef<HTMLInputElement>(null);
+  const desktopFileRef = useRef<HTMLInputElement>(null);
   const t = STRINGS[lang];
-  const { result, error: pollError, timedOut, retry: repoll } = useJobPoll(jobId);
+  const { result, error: pollError, timedOut } = useJobPoll(jobId);
 
   useEffect(() => {
     try {
@@ -113,7 +114,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl px-4 pb-16">
+      <main className="mx-auto max-w-xl lg:max-w-4xl px-4 pb-16">
         {tab === 'review' ? (
           <ReviewQueue lang={lang} />
         ) : tab === 'how' ? (
@@ -128,9 +129,11 @@ export default function App() {
               <p className="mt-1 text-sm text-text-secondary">{t.heroSub}</p>
             </section>
 
-            {/* Camera and voice are equal-weight peers — no "or" divider demoting voice */}
-            <div className="grid gap-3">
-              {showCamera ? (
+            {/* Camera and voice are equal-weight peers — no "or" divider demoting voice.
+                Desktop (≥1024px) switches to an upload-first two-column treatment via
+                pure CSS visibility toggling; the camera-capture screen stays centered. */}
+            {showCamera ? (
+              <div className="mx-auto w-full max-w-xl">
                 <LiveCamera
                   lang={lang}
                   onCapture={(f) => {
@@ -143,30 +146,65 @@ export default function App() {
                   }}
                   onClose={() => setShowCamera(false)}
                 />
-              ) : (
-                <button
-                  onClick={() => setShowCamera(true)}
-                  className="camera-card"
-                  aria-label={t.cameraTitle}
-                  disabled={busy}
-                >
-                  <div className="camera-icon text-text-secondary" aria-hidden>
-                    <Camera size={56} strokeWidth={1.5} />
+              </div>
+            ) : (
+              <>
+                {/* Mobile: camera-first, stacked */}
+                <div className="grid gap-3 lg:hidden">
+                  <button
+                    onClick={() => setShowCamera(true)}
+                    className="camera-card"
+                    aria-label={t.cameraTitle}
+                    disabled={busy}
+                  >
+                    <div className="camera-icon text-text-secondary" aria-hidden>
+                      <Camera size={48} strokeWidth={1.75} />
+                    </div>
+                    <h3 className="camera-title">{t.cameraTitle}</h3>
+                    <p className="camera-subtitle">{t.cameraSub}</p>
+                    <span className="camera-cta">{t.cameraCta}</span>
+                  </button>
+                  <VoiceRecorder jobId={jobId} lang={lang} variant="hero" />
+                </div>
+                {/* Desktop: upload-first peer grid (QR-to-mobile flow intentionally
+                    omitted — no shareable-link scheme exists yet). */}
+                <div className="hidden lg:grid lg:grid-cols-2 lg:gap-6">
+                  <div className="camera-card cursor-default">
+                    <div className="camera-icon text-text-secondary" aria-hidden>
+                      <Upload size={48} strokeWidth={1.75} />
+                    </div>
+                    <h3 className="camera-title">{t.desktopUploadTitle}</h3>
+                    <p className="camera-subtitle">{t.desktopUploadSub}</p>
+                    <button
+                      onClick={() => desktopFileRef.current?.click()}
+                      className="btn-primary mt-2"
+                      disabled={busy}
+                    >
+                      {t.useUpload}
+                    </button>
                   </div>
-                  <h3 className="camera-title">{t.cameraTitle}</h3>
-                  <p className="camera-subtitle">{t.cameraSub}</p>
-                  <span className="camera-cta">{t.cameraCta}</span>
-                </button>
-              )}
-
-              <VoiceRecorder jobId={jobId} lang={lang} />
-            </div>
+                  <VoiceRecorder jobId={jobId} lang={lang} variant="hero" />
+                </div>
+              </>
+            )}
 
             <input
               ref={fileRef}
               type="file"
               accept="image/jpeg,image/png"
               capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) submitFile(f);
+                e.target.value = '';
+              }}
+            />
+            {/* Desktop picker: same flow, no capture hint for file pickers */}
+            <input
+              ref={desktopFileRef}
+              type="file"
+              accept="image/jpeg,image/png"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0];
@@ -183,26 +221,28 @@ export default function App() {
               </div>
             )}
 
-            {/* Processing / result */}
-            {jobId && !terminal && !pollError && !timedOut && (
-              <div className="mt-4">
-                <ProcessingStages status={result?.status ?? 'queued'} lang={lang} />
-              </div>
-            )}
-            {jobId && timedOut && !terminal && (
-              <div className="card mt-4 text-center space-y-3">
-                <p className="text-base">{t.slowJob}</p>
-                <button onClick={repoll} className="btn-secondary w-full">
-                  {t.retry}
-                </button>
-              </div>
-            )}
-            {jobId && !terminal && !result && (
-              <div className="mt-4 space-y-2" aria-hidden>
-                <div className="skeleton h-16" />
-                <div className="skeleton h-24" />
-              </div>
-            )}
+            {/* Processing screen: stays centered at mobile max-width on desktop */}
+            <div className="mx-auto w-full max-w-xl">
+              {jobId && !terminal && !pollError && !timedOut && (
+                <div className="mt-4">
+                  <ProcessingStages status={result?.status ?? 'queued'} lang={lang} />
+                </div>
+              )}
+              {jobId && timedOut && !terminal && (
+                <div className="card mt-4 text-center space-y-3">
+                  <p className="text-base">{t.timedOutMessage}</p>
+                  <button onClick={retry} className="btn-secondary w-full" disabled={!file}>
+                    {t.retry}
+                  </button>
+                </div>
+              )}
+              {jobId && !terminal && !result && (
+                <div className="mt-4 space-y-2" aria-hidden>
+                  <div className="skeleton h-16" />
+                  <div className="skeleton h-24" />
+                </div>
+              )}
+            </div>
             {pollError && (
               <div className="card mt-4">
                 <p className="text-sm text-error">{pollError}</p>
@@ -215,15 +255,19 @@ export default function App() {
             {terminal && result && (
               <section className="mt-4 space-y-4">
                 {result.status === 'completed' && (
-                  <>
+                  <div className="lg:grid lg:grid-cols-[1.6fr_1fr] lg:gap-8 lg:items-start space-y-4 lg:space-y-0">
                     {/* Screen-order contract (design v2 §1): verdict → AI
-                        disclosure → stepper → key facts → Q&A → voice →
-                        collapsed details. Keep this order when adding new. */}
-                    <VerdictBanner escalated={result.escalation.flagged} lang={lang} />
-                    <p className="ai-disclosure">{t.aiDisclosureLine}</p>
-                    {result.explanation && (
-                      <ProgressiveExplanation text={result.explanation} lang={lang} />
-                    )}
+                        disclosure → stepper → key facts → collapsed
+                        details → Q&A → voice. Keep this order when
+                        adding new. */}
+                    <div className="space-y-4">
+                      <VerdictBanner escalated={result.escalation.flagged} lang={lang} />
+                      <p className="ai-disclosure">{t.aiDisclosureLine}</p>
+                      {result.explanation && (
+                        <ProgressiveExplanation text={result.explanation} lang={lang} />
+                      )}
+                    </div>
+                    <div className="space-y-4 lg:sticky lg:top-4">
                     {(result.fields?.issuingAuthority ||
                       result.fields?.deadlineDate ||
                       result.fields?.amountOwed != null) && (
@@ -240,7 +284,7 @@ export default function App() {
                         )}
                         {result.fields.deadlineDate && (
                           <FieldRow
-                            icon={<CalendarDays size={20} strokeWidth={1.75} aria-hidden />}
+                            icon={<Calendar size={20} strokeWidth={1.75} aria-hidden />}
                             label="Deadline"
                             value={formatDate(result.fields.deadlineDate, lang)}
                             confidence={result.classificationConfidence}
@@ -249,7 +293,7 @@ export default function App() {
                         )}
                         {result.fields.amountOwed != null && (
                           <FieldRow
-                            icon={<Banknote size={20} strokeWidth={1.75} aria-hidden />}
+                            icon={<IndianRupee size={20} strokeWidth={1.75} aria-hidden />}
                             label="Amount"
                             value={formatCurrency(result.fields.amountOwed)}
                             confidence={result.classificationConfidence}
@@ -258,8 +302,6 @@ export default function App() {
                         )}
                       </div>
                     )}
-                    {result.explanation && <FollowUpQA jobId={result.jobId} lang={lang} />}
-                    <VoicePlayer jobId={result.jobId} lang={lang} />
                     {(result.fields?.citedSection || result.fields?.requiredAction) && (
                       <details className="card">
                         <summary className="cursor-pointer font-medium min-h-[48px] inline-flex items-center">
@@ -281,7 +323,10 @@ export default function App() {
                         </div>
                       </details>
                     )}
-                  </>
+                      {result.explanation && <FollowUpQA jobId={result.jobId} lang={lang} />}
+                      <VoicePlayer jobId={result.jobId} lang={lang} />
+                    </div>
+                  </div>
                 )}
                 {result.status === 'awaiting_review' && result.errorCode === 'E-201' && (
                   <div className="card text-center space-y-3">
@@ -311,7 +356,13 @@ export default function App() {
 
             {/* Disclaimer: quiet, always visible — sticky once a job exists
                 so it's never hidden behind a scroll (design v2 §2) */}
-            <div className={jobId ? 'disclaimer disclaimer-sticky mt-6' : 'disclaimer mt-6'}>
+            <div
+              className={
+                jobId
+                  ? 'disclaimer disclaimer-sticky mt-6 lg:max-w-3xl lg:mx-auto'
+                  : 'disclaimer mt-6'
+              }
+            >
               {t.disclaimer}
             </div>
           </>

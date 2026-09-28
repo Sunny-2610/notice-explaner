@@ -8,6 +8,12 @@ function level(confidence: number | null | undefined): 'high' | 'medium' | 'low'
   return 'low';
 }
 
+const DOT_COLOR: Record<'high' | 'medium' | 'low', string> = {
+  high: '#16A34A',
+  medium: '#EA580C',
+  low: '#DC2626',
+};
+
 export default function FieldRow({
   icon,
   label,
@@ -40,7 +46,17 @@ export default function FieldRow({
           <p className="field-label">{label}</p>
           <p className="field-value">{value}</p>
         </div>
-        <span aria-hidden title={sentence} className={`conf-dot conf-dot-${lv}`} />
+        <span
+          aria-hidden
+          title={sentence}
+          style={{
+            background: DOT_COLOR[lv],
+            width: 8,
+            height: 8,
+            borderRadius: 9999,
+            flexShrink: 0,
+          }}
+        />
       </button>
       {expanded && <p className="conf-sentence">{sentence}</p>}
     </div>

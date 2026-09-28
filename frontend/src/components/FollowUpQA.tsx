@@ -73,9 +73,9 @@ export default function FollowUpQA({ jobId, lang }: { jobId: string; lang: Lang 
           {busy ? '…' : t.askButton}
         </button>
       </form>
-      {askedCount >= 1 && (
+      {askedCount > 0 && (
         <p className="text-xs text-text-muted" aria-live="polite">
-          {askedCount}/10 {t.questionsAsked}
+          {t.askCounterLabel.replace('{count}', String(askedCount))}
         </p>
       )}
       {error && <p className="text-sm text-error">{error}</p>}
