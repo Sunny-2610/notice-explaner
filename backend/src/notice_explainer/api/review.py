@@ -46,5 +46,23 @@ def resolve(
     else:
         deps.job_store.set_status(job_id, JobStatus.FAILED, "E-401")
     deps.image_store.delete(job_id)
+    # WhatsApp notify hook: deliver the approved/edited explanation to the
+    # sender via the ephemeral job_id -> sender registry (in-memory only).
+    if body.decision in ("approve", "edit"):
+        try:
+            from ..application.use_cases.whatsapp_flow import (
+                sender_registry,
+                split_message,
+            )
+
+            info = sender_registry.pop(job_id, None)
+            if info is not None:
+                result = deps.job_store.get_result(job_id) or {}
+                text = result.get("explanation") or ""
+                if text:
+                    for part in split_message(text):
+                        deps.messaging_channel.send_message(info.get("to", ""), part)
+        except Exception:
+            pass  # notify failures must never fail the resolve itself
     return ReviewItem(jobId=case.job_id, routedReason=case.routed_reason.value,
-                      reviewerId=case.reviewer_id, decision=case.decision)
+                       reviewerId=case.reviewer_id, decision=case.decision)

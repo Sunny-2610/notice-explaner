@@ -15,6 +15,8 @@ from fastapi import Header, HTTPException
 
 from ..infrastructure.escalation import YamlEscalationEvaluator
 from ..infrastructure.grounding import GroundedFieldExtractor
+from ..infrastructure.legal_aid import JsonLegalAidDirectory
+from ..infrastructure.twilio_whatsapp import FakeMessagingChannel
 from ..infrastructure.fake_ai import (
     FakeClassifier,
     FakeExplanationGenerator,
@@ -99,6 +101,33 @@ if os.getenv("BHASHINI_API_KEY") and not USE_FAKE:
 else:
     voice_service = FakeVoiceService()
 escalation_eval = YamlEscalationEvaluator()
+
+# Free legal-aid directory (seed data only; states populated by maintainer).
+try:
+    legal_aid_dir = JsonLegalAidDirectory()
+except Exception as exc:
+    print(f"deps: legal-aid directory unavailable ({exc})")
+    legal_aid_dir = None  # type: ignore[assignment]
+
+# WhatsApp channel: Twilio only when fully configured, else fake recorder.
+# Raw numbers are never logged or stored outside the ephemeral in-memory
+# sender registry (see application/use_cases/whatsapp_flow.py).
+try:
+    if all([
+        os.getenv("TWILIO_ACCOUNT_SID"),
+        os.getenv("TWILIO_AUTH_TOKEN"),
+        os.getenv("TWILIO_WHATSAPP_FROM"),
+        os.getenv("PUBLIC_BASE_URL"),
+        os.getenv("WHATSAPP_HASH_SALT"),
+    ]):
+        from ..infrastructure.twilio_whatsapp import TwilioWhatsAppChannel
+
+        messaging_channel = TwilioWhatsAppChannel()  # type: ignore[assignment]
+    else:
+        raise RuntimeError("WhatsApp env unset — fake channel")
+except Exception as exc:
+    print(f"deps: fake messaging channel fallback ({exc})")
+    messaging_channel = FakeMessagingChannel()
 
 def require_reviewer_key(
     x_reviewer_key: str | None = Header(default=None, alias="X-Reviewer-Key"),
