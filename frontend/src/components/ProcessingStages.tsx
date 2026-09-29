@@ -1,61 +1,108 @@
-import { BookOpen, CheckCircle2, Circle, FileText, Loader2, MessagesSquare, ShieldCheck, Tag } from 'lucide-react';
+import { Clock, ShieldCheck, AlertCircle, Languages, AlertTriangle } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
 const STAGES = [
-  { key: 'extracting', Icon: BookOpen },
-  { key: 'classifying', Icon: Tag },
-  { key: 'extracting_fields', Icon: FileText },
-  { key: 'generating_explanation', Icon: MessagesSquare },
-  { key: 'checking_escalation', Icon: ShieldCheck },
+  { key: 'extracting', icon: 'file', hi: 'नोटिस पढ़ा जा रहा है', en: 'Reading notice scan & text', mr: 'नोटीस वाचली जात आहे' },
+  { key: 'classifying', icon: 'file', hi: 'प्रकार पहचाना जा रहा है', en: 'Identifying document category & issuing authority', mr: 'प्रकार ओळखला जात आहे' },
+  { key: 'extracting_fields', icon: 'extract', hi: 'जानकारी निकाली जा रही है', en: 'Extracting important dates & penalty amounts', mr: 'माहिती काढली जात आहे' },
+  { key: 'generating_explanation', icon: 'translate', hi: 'सरल भाषा में समझाया जा रहा है', en: 'Generating plain language legal summary', mr: 'सोप्या भाषेत समजावले जात आहे' },
+  { key: 'checking_escalation', icon: 'alert', hi: 'गंभीरता जाँची जा रही है', en: 'Assessing urgency, risk level & deadlines', mr: 'गांभीर्य तपासले जात आहे' },
 ] as const;
 
-const LABEL: Record<Lang, Record<string, string>> = {
-  hi: {
-    extracting: 'नोटिस पढ़ा जा रहा है',
-    classifying: 'प्रकार पहचाना जा रहा है',
-    extracting_fields: 'जानकारी निकाली जा रही है',
-    generating_explanation: 'सरल भाषा में समझाया जा रहा है',
-    checking_escalation: 'गंभीरता जाँची जा रही है',
-  },
-  mr: {
-    extracting: 'नोटीस वाचली जात आहे',
-    classifying: 'प्रकार ओळखला जात आहे',
-    extracting_fields: 'माहिती काढली जात आहे',
-    generating_explanation: 'सोप्या भाषेत समजावले जात आहे',
-    checking_escalation: 'गांभीर्य तपासले जात आहे',
-  },
-};
-
-/** Animated stage list driven by the live job status — no bare spinners. */
 export default function ProcessingStages({ status, lang }: { status: string; lang: Lang }) {
   const order = ['queued', ...STAGES.map((s) => s.key)];
-  const currentIndex = Math.max(order.indexOf(status), 0);
+  // If status is not in order (like a delay), cap it, otherwise find index
+  let currentIndex = order.indexOf(status);
+  if (currentIndex === -1) currentIndex = 0; // Default if not found
+
+  // Map backend status to 0-4 for UI steps
+  const activeStep = Math.max(0, currentIndex - 1); 
+  
+  // Calculate progress percentage based on 5 steps
+  const progressPercent = Math.min(((activeStep + 0.5) / STAGES.length) * 100, 100);
+
   return (
-    <div className="card" aria-live="polite">
-      <p className="text-sm font-medium text-text-secondary mb-1">{STRINGS[lang].processing}</p>
-      {STAGES.map((stage, i) => {
-        const stageIndex = i + 1;
-        const done = stageIndex < currentIndex || currentIndex >= order.length;
-        const active = !done && stageIndex === currentIndex;
-        const cls = done ? 'stage stage-done' : active ? 'stage stage-active' : 'stage';
-        const { Icon } = stage;
-        return (
-          <div key={stage.key} className={cls}>
-            <span aria-hidden>
-              {done ? (
-                <CheckCircle2 size={20} strokeWidth={1.75} />
-              ) : active ? (
-                <Loader2 size={20} strokeWidth={1.75} className="animate-spin" />
-              ) : (
-                <Circle size={20} strokeWidth={1.75} />
-              )}
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Icon size={20} strokeWidth={1.75} aria-hidden /> {LABEL[lang][stage.key]}
-            </span>
-          </div>
-        );
-      })}
+    <div className="w-full flex flex-col gap-6" aria-live="polite">
+      {/* Header and Title */}
+      <div className="text-center pt-8 mb-2">
+         <h2 className="text-2xl font-bold text-gray-900 mb-1">दस्तावेज़ का विश्लेषण हो रहा है</h2>
+         <p className="text-gray-500 text-sm mb-6">Analyzing your document</p>
+         <div className="inline-flex items-center gap-1.5 bg-[#F3F4F6] text-gray-600 px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm">
+            <Clock size={14} className="text-primary" /> अनुमानित समय: ~15 सेकंड (Est. 15s)
+         </div>
+      </div>
+
+      {/* Main Stepper Card */}
+      <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm overflow-hidden relative">
+         
+         {/* Vertical Stepper Container */}
+         <div className="relative z-10 flex flex-col gap-0 pb-6 mb-2">
+            {STAGES.map((stage, i) => {
+               const isDone = i < activeStep;
+               const isActive = i === activeStep;
+               const isPending = i > activeStep;
+
+               return (
+                 <div key={stage.key} className="relative flex gap-4 min-h-[5rem]">
+                   {/* Line Connector connecting items */}
+                   {i !== STAGES.length - 1 && (
+                      <div className={`absolute left-[15px] top-[32px] bottom-[-8px] w-0.5 ${isDone ? 'bg-green-300' : 'bg-gray-200'}`}></div>
+                   )}
+                   
+                   {/* Icons Container */}
+                   <div className="relative shrink-0 w-8 flex justify-center pt-1 z-10">
+                     {isDone && (
+                        <div className="w-8 h-8 rounded-full border border-green-200 bg-white text-green-500 flex items-center justify-center">
+                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                     )}
+                     {isActive && (
+                        <div className="relative w-8 h-8 flex items-center justify-center">
+                           <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+                           <div className="w-2 h-2 rounded-full bg-primary mx-auto"></div>
+                        </div>
+                     )}
+                     {isPending && (
+                        <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-400 border border-gray-200 flex items-center justify-center">
+                           {stage.icon === 'translate' ? <Languages size={14} strokeWidth={2}/> : <AlertCircle size={14} strokeWidth={2}/> }
+                        </div>
+                     )}
+                   </div>
+
+                   {/* Content */}
+                   <div className={`flex-1 pb-6 ${isActive ? 'bg-blue-50/40 rounded-xl px-3 py-2 -mt-1 -mx-3 border border-blue-100' : 'pt-1'}`}>
+                      <div className="flex items-start justify-between">
+                         <div className="">
+                            <h4 className={`text-lg font-bold leading-tight ${isPending ? 'text-gray-400' : 'text-gray-900'} mb-1`}>{lang === 'mr' ? stage.mr : stage.hi}</h4>
+                            <p className={`${isActive ? 'text-primary' : 'text-gray-500'} text-xs font-medium`}>{stage.en}</p>
+                         </div>
+                         {/* Badges */}
+                         {isDone && (
+                            <span className="bg-green-50 text-green-600 border border-green-200 text-[10px] font-bold px-2.5 py-0.5 rounded ml-2 shrink-0">पूर्ण</span>
+                         )}
+                         {isActive && (
+                             <span className="bg-blue-100 text-primary border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 shrink-0 flex items-center gap-1 leading-tight text-center">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span> प्रक्रिया<br/>चालू
+                             </span>
+                         )}
+                      </div>
+                   </div>
+
+                 </div>
+               );
+            })}
+         </div>
+
+         {/* Progress bar line */}
+         <div className="relative h-1.5 bg-gray-100/80 rounded-full w-full overflow-hidden">
+            <div className="absolute top-0 bottom-0 left-0 bg-primary/80 transition-all duration-300" style={{ width: `${progressPercent}%` }}></div>
+         </div>
+
+         {/* Footer text */}
+         <div className="mt-4 flex items-center justify-center gap-1.5 text-xs font-medium text-gray-500">
+            <Clock size={14} /> आमतौर पर 15 सेकंड से कम समय लगता है (Usually {"<"}15 seconds)
+         </div>
+      </div>
     </div>
   );
 }
