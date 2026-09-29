@@ -1,0 +1,66 @@
+"""Answer a follow-up question about a processed notice.
+
+Orchestration only — this module does NOT know about LangChain. The agent
+is injected via parameter (port), so domain/application stay clean.
+
+Safety: the agent runs AFTER the pipeline, reads notice text + explanation
+only, and can never touch escalation state. Max 10 questions per job
+(enforced via the audit trail so it works with any audit backend).
+"""
+from __future__ import annotations
+
+from ...domain.types import ErrorCode
+
+MAX_QUESTIONS_PER_JOB = 10
+QA_AUDIT_STAGE = "qa_ask"
+
+
+class AnswerQuestionError(Exception):
+    def __init__(self, code: ErrorCode, message: str, status_code: int = 400):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+        self.status_code = status_code
+
+
+def answer_question(
+    job_id: str,
+    question: str,
+    *,
+    job_store,
+    qa_agent,
+    audit=None,
+) -> str:
+    if not question or not question.strip():
+        raise AnswerQuestionError(ErrorCode.INVALID_FILE, "Question cannot be empty.")
+
+    result = job_store.get_result(job_id)
+    if result is None:
+        raise AnswerQuestionError(ErrorCode.INVALID_FILE, "unknown jobId", status_code=404)
+
+    if not result.get("explanation"):
+        raise AnswerQuestionError(ErrorCode.INVALID_FILE, "Explanation not ready yet.")
+
+    if audit is not None:
+        asked = sum(1 for e in audit.entries_for(job_id)
+                    if getattr(e, "stage_name", "") == QA_AUDIT_STAGE)
+        if asked >= MAX_QUESTIONS_PER_JOB:
+            raise AnswerQuestionError(
+                ErrorCode.INVALID_FILE,
+                f"Too many questions (max {MAX_QUESTIONS_PER_JOB} per notice).")
+
+    extraction = job_store.extractions.get(job_id)
+    notice_text = extraction.text if extraction else ""
+
+    answer = qa_agent.answer(
+        notice_text=notice_text,
+        explanation=result["explanation"],
+        target_language=result.get("targetLanguage", "hi"),
+        question=question.strip(),
+    )
+
+    if audit is not None:
+        audit.log_stage(job_id, QA_AUDIT_STAGE,
+                        {"question": question.strip()[:300]},
+                        {"answer": str(answer)[:500]})
+    return answer
