@@ -14,6 +14,8 @@ from .api.whatsapp import router as whatsapp_router
 
 
 def create_app() -> FastAPI:
+    from dotenv import load_dotenv
+    load_dotenv()
     import os as _os
 
     if not _os.getenv("REVIEWER_API_KEY"):

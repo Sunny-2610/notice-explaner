@@ -162,9 +162,9 @@ class GeminiEmbeddingRetriever:
         if h in cache:
             return cache[h]
         url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
-               f"{self.model}:embedContent?key={key}")
+               f"{self.model}:embedContent")
         r = httpx.post(
-            url, json={"content": {"parts": [{"text": text[:4000]}]}}, timeout=8)
+            url, json={"content": {"parts": [{"text": text[:4000]}]}}, headers={"x-goog-api-key": key}, timeout=8)
         r.raise_for_status()
         values = r.json()["embedding"]["values"]
         cache[h] = values

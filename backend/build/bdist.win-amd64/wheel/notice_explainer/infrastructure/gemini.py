@@ -38,11 +38,11 @@ def _generate(
     timeout: int = VISION_REASONING_TIMEOUT_S,
     generation_config: dict | None = None,
 ) -> str:
-    url = f"{_API}/{_MODEL}:generateContent?key={_key()}"
+    url = f"{_API}/{_MODEL}:generateContent"
     body: dict = {"contents": [{"parts": parts}]}
     if generation_config is not None:
         body["generationConfig"] = generation_config
-    r = httpx.post(url, json=body, timeout=timeout)
+    r = httpx.post(url, json=body, headers={"x-goog-api-key": _key()}, timeout=timeout)
     r.raise_for_status()
     data = r.json()
     candidates = data.get("candidates")

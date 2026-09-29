@@ -15,6 +15,13 @@ from ...domain.types import (
     ReviewReason,
 )
 from ..retry import run_with_retries
+import os
+
+def _redact_key(text: str) -> str:
+    key = os.getenv("GEMINI_API_KEY", "")
+    if key and key in text:
+        return text.replace(key, "***REDACTED***")
+    return text
 
 
 def process_job(
@@ -42,7 +49,7 @@ def process_job(
         extraction = run_with_retries(lambda: extractor.extract(image or b""))
     except Exception as exc:  # E-301 retries exhausted
         job_store.set_status(job_id, JobStatus.FAILED, ErrorCode.AI_TIMEOUT.value)
-        audit.log_stage(job_id, "extraction", {}, {"error": str(exc)[:300]})
+        audit.log_stage(job_id, "extraction", {}, {"error": _redact_key(str(exc))[:300]})
         image_store.delete(job_id)
         return
     job_store.save_extraction(job_id, extraction)
@@ -60,7 +67,7 @@ def process_job(
         classification = run_with_retries(lambda: classifier.classify(extraction.text))
     except Exception as exc:
         job_store.set_status(job_id, JobStatus.FAILED, ErrorCode.AI_TIMEOUT.value)
-        audit.log_stage(job_id, "classification", {}, {"error": str(exc)[:300]})
+        audit.log_stage(job_id, "classification", {}, {"error": _redact_key(str(exc))[:300]})
         image_store.delete(job_id)
         return
     job_store.save_classification(job_id, classification)
@@ -82,7 +89,7 @@ def process_job(
         )
     except Exception as exc:
         job_store.set_status(job_id, JobStatus.FAILED, ErrorCode.AI_TIMEOUT.value)
-        audit.log_stage(job_id, "field_extraction", {}, {"error": str(exc)[:300]})
+        audit.log_stage(job_id, "field_extraction", {}, {"error": _redact_key(str(exc))[:300]})
         image_store.delete(job_id)
         return
     job_store.save_fields(job_id, fields)
@@ -106,7 +113,7 @@ def process_job(
         )
     except Exception as exc:
         job_store.set_status(job_id, JobStatus.FAILED, ErrorCode.AI_TIMEOUT.value)
-        audit.log_stage(job_id, "explanation", {}, {"error": str(exc)[:300]})
+        audit.log_stage(job_id, "explanation", {}, {"error": _redact_key(str(exc))[:300]})
         image_store.delete(job_id)
         return
     job_store.save_explanation(job_id, job.target_language, explanation)

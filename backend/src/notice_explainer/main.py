@@ -4,6 +4,9 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from dotenv import load_dotenv
+load_dotenv()  # Must run BEFORE local imports like .api.* which rely on deps.py
+
 from .api.audit import router as audit_router
 from .api.documents import router as documents_router
 from .api.events import router as events_router
@@ -11,7 +14,6 @@ from .api.legal_aid import router as legal_aid_router
 from .api.review import router as review_router
 from .api.voice import router as voice_router
 from .api.whatsapp import router as whatsapp_router
-
 
 def create_app() -> FastAPI:
     import os as _os
