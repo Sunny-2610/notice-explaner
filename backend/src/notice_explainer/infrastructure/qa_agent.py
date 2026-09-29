@@ -72,7 +72,7 @@ class QAAgent:
     def _get_llm(self):
         if self._llm is None:
             self._llm = ChatGoogleGenerativeAI(
-                model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+                model=os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite"),
                 temperature=0.2,
                 google_api_key=os.getenv("GEMINI_API_KEY"),
             )

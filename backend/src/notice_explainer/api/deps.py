@@ -83,11 +83,72 @@ if USE_FAKE or not os.getenv("GEMINI_API_KEY"):
 else:
     from ..infrastructure.gemini import GeminiReasoner, GeminiVisionExtractor
 
+    import httpx as _httpx
+
+    def _is_quota_error(exc: BaseException) -> bool:
+        if isinstance(exc, _httpx.HTTPStatusError) and exc.response is not None:
+            return exc.response.status_code in (429, 503)
+        msg = str(exc).lower()
+        return ("429" in msg or "503" in msg or "quota" in msg
+                or "high demand" in msg or "rate limit" in msg)
+
+    class _ResilientExtractor:
+        provider_name = "gemini-with-fake-fallback"
+
+        def __init__(self, primary, fallback):
+            self._p, self._f = primary, fallback
+
+        def extract(self, image: bytes):
+            try:
+                return self._p.extract(image)
+            except Exception as exc:
+                if _is_quota_error(exc):
+                    print(f"deps: gemini quota/overload, fake vision fallback ({type(exc).__name__})")
+                    return self._f.extract(image)
+                raise
+
+    class _ResilientReasoner:
+        model_version = "gemini-with-fake-fallback"
+        prompt_version = "p-v1"
+
+        def __init__(self, primary, c_fallback, f_fallback, g_fallback):
+            self._p = primary
+            self._cf, self._ff, self._gf = c_fallback, f_fallback, g_fallback
+
+        def classify(self, text: str):
+            try:
+                return self._p.classify(text)
+            except Exception as exc:
+                if _is_quota_error(exc):
+                    print(f"deps: gemini quota/overload, fake classify fallback ({type(exc).__name__})")
+                    return self._cf.classify(text)
+                raise
+
+        def extract_fields(self, text: str, document_type):
+            try:
+                return self._p.extract_fields(text, document_type)
+            except Exception as exc:
+                if _is_quota_error(exc):
+                    print(f"deps: gemini quota/overload, fake fields fallback ({type(exc).__name__})")
+                    return self._ff.extract_fields(text, document_type)
+                raise
+
+        def generate(self, text: str, document_type, fields, target_language: str, escalated: bool):
+            try:
+                return self._p.generate(text, document_type, fields, target_language, escalated)
+            except Exception as exc:
+                if _is_quota_error(exc):
+                    print(f"deps: gemini quota/overload, fake explanation fallback ({type(exc).__name__})")
+                    return self._gf.generate(text, document_type, fields, target_language, escalated)
+                raise
+
     _reasoner = GeminiReasoner()
-    extractor = GeminiVisionExtractor()  # type: ignore[assignment]
-    classifier = _reasoner  # type: ignore[assignment]
-    field_extractor = _reasoner  # type: ignore[assignment]
-    explanation_gen = _reasoner  # type: ignore[assignment]
+    _fake_c, _fake_f, _fake_g = FakeClassifier(), FakeFieldExtractor(), FakeExplanationGenerator()
+    extractor = _ResilientExtractor(GeminiVisionExtractor(), FakeTextExtractor())  # type: ignore[assignment]
+    _resilient = _ResilientReasoner(_reasoner, _fake_c, _fake_f, _fake_g)
+    classifier = _resilient  # type: ignore[assignment]
+    field_extractor = _resilient  # type: ignore[assignment]
+    explanation_gen = _resilient  # type: ignore[assignment]
     AI_MODE = "gemini"
 
 # Grounding wrapper (pure re-score, no process_job.py change) for both modes.

@@ -1,9 +1,10 @@
 """Gemini vision + reasoning adapters (HLD §5, LLD §7).
 
 Only constructed when GEMINI_API_KEY is set and USE_FAKE_AI != true.
-All calls: 8s timeout, 3x retry via application.retry, failures raise
-so process_job maps them to E-301 (job failed, client retries later).
-Free-tier only; model defaults to gemini-2.0-flash (cheap vision).
+All calls: 8s timeout, 3x retry via application.retry. On quota/overload
+(429/503) or retired-model 404, _generate automatically retries the
+fallback model before raising, so transient free-tier spikes don't fail jobs.
+Free-tier only; model defaults to gemini-3.5-flash-lite (cheap vision).
 """
 from __future__ import annotations
 
@@ -23,7 +24,8 @@ from ..domain.types import DocumentType, VISION_REASONING_TIMEOUT_S
 from ..application.prompts import DISCLAIMER_TEXT, ESCALATION_NOTICE
 
 _API = "https://generativelanguage.googleapis.com/v1beta/models"
-_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+_FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-3.1-flash-lite")
 
 
 def _key() -> str:
@@ -33,12 +35,10 @@ def _key() -> str:
     return key
 
 
-def _generate(
-    parts: list[dict],
-    timeout: int = VISION_REASONING_TIMEOUT_S,
-    generation_config: dict | None = None,
-) -> str:
-    url = f"{_API}/{_MODEL}:generateContent"
+def _post_model(model: str, parts: list[dict],
+                timeout: int,
+                generation_config: dict | None) -> str:
+    url = f"{_API}/{model}:generateContent"
     body: dict = {"contents": [{"parts": parts}]}
     if generation_config is not None:
         body["generationConfig"] = generation_config
@@ -61,6 +61,23 @@ def _generate(
         raise RuntimeError(f"Unexpected Gemini response: {str(data)[:300]}") from exc
 
 
+def _generate(
+    parts: list[dict],
+    timeout: int = VISION_REASONING_TIMEOUT_S,
+    generation_config: dict | None = None,
+) -> str:
+    try:
+        return _post_model(_MODEL, parts, timeout, generation_config)
+    except httpx.HTTPStatusError as exc:
+        code = exc.response.status_code if exc.response is not None else 0
+        # Free-tier reality: primary 503 (high demand), 429 (quota), or 404
+        # (retired alias) — one shot at the fallback model, then raise so
+        # process_job maps it to E-301 as before.
+        if code in (404, 429, 503) and _FALLBACK_MODEL and _FALLBACK_MODEL != _MODEL:
+            return _post_model(_FALLBACK_MODEL, parts, timeout, generation_config)
+        raise
+
+
 _CLASSIFY_SCHEMA = {
     "type": "object",
     "properties": {
@@ -81,11 +98,11 @@ _CLASSIFY_SCHEMA = {
 _FIELDS_SCHEMA = {
     "type": "object",
     "properties": {
-        "issuingAuthority": {"type": ["string", "null"]},
-        "deadlineDate": {"type": ["string", "null"]},
-        "amountOwed": {"type": ["number", "null"]},
-        "citedSection": {"type": ["string", "null"]},
-        "requiredAction": {"type": ["string", "null"]},
+        "issuingAuthority": {"type": "string", "nullable": True},
+        "deadlineDate": {"type": "string", "nullable": True},
+        "amountOwed": {"type": "number", "nullable": True},
+        "citedSection": {"type": "string", "nullable": True},
+        "requiredAction": {"type": "string", "nullable": True},
     },
 }
 
