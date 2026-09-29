@@ -36,3 +36,5 @@ WhatsApp channel needs `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`,
 (see `backend/.env.example`); otherwise the webhook stays 404.
 
 Every explanation and every `/ask` answer ends with the not-legal-advice disclaimer. Escalation is deterministic and never modified by the Q&A agent (see `docs/adr/0003-qa-agent.md`).
+
+<!-- Minor update for commit -->
