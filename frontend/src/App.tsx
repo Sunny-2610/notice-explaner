@@ -23,14 +23,22 @@ type Tab = 'explain' | 'how' | 'faq' | 'review';
 function initialLang(): Lang {
   try {
     const saved = localStorage.getItem('ym_lang');
-    if (saved === 'hi' || saved === 'mr') return saved;
+    if (saved === 'hi' || saved === 'mr' || saved === 'en') return saved;
   } catch {
     /* storage unavailable — fall through to navigator default */
   }
   if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('mr'))
     return 'mr';
+  if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('en'))
+    return 'en';
   return 'hi';
 }
+
+const LANG_OPTIONS: { value: Lang; label: string }[] = [
+  { value: 'hi', label: 'हिंदी' },
+  { value: 'mr', label: 'मराठी' },
+  { value: 'en', label: 'English' },
+];
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('explain');
@@ -105,24 +113,36 @@ export default function App() {
              <div className="bg-primary text-white p-2 rounded-xl flex items-center justify-center">
                <Landmark size={24} strokeWidth={2} />
              </div>
-             <div className="flex flex-col text-left text-text-primary">
-               <span className="text-lg font-bold leading-tight">योजना मित्र / Yojana Mitra</span>
-               <span className="text-xs text-text-secondary hidden sm:block">नागरिक सेवा मंच • Citizen Portal</span>
-             </div>
-          </button>
+              <div className="flex flex-col text-left text-text-primary">
+                <span className="text-lg font-bold leading-tight">योजना मित्र / Yojana Mitra</span>
+                <span className="text-xs text-text-secondary hidden sm:block">{t.brandSub}</span>
+              </div>
+           </button>
           <nav className="hidden lg:flex items-center gap-6 font-medium text-sm text-text-secondary">
-            <button className="text-primary border-b-2 border-primary pb-1">योजनाएं</button>
-            <button className="hover:text-primary transition-colors">पात्रता जांचें</button>
-            <button className="hover:text-primary transition-colors">सहायता केंद्र</button>
+            <button onClick={() => setTab('explain')} className="text-primary border-b-2 border-primary pb-1">{t.navSchemes}</button>
+            <button onClick={() => setTab('how')} className="hover:text-primary transition-colors">{t.navEligibility}</button>
+            <button onClick={() => setTab('faq')} className="hover:text-primary transition-colors">{t.navSupport}</button>
           </nav>
           <div className="flex items-center gap-4">
-            <button onClick={() => setLang(lang === 'hi' ? 'mr' : 'hi')} className="flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-gray-50 transition-colors text-sm font-medium text-text-primary">
+            <label className="flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-gray-50 transition-colors text-sm font-medium text-text-primary cursor-pointer">
               <Languages size={18} className="text-primary" />
-              <span>{lang === 'hi' ? 'हिंदी / मराठी' : 'मराठी / हिंदी'}</span>
-            </button>
+              <span className="sr-only">{t.language}</span>
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value as Lang)}
+                aria-label={t.language}
+                className="bg-transparent outline-none cursor-pointer text-text-primary font-medium"
+              >
+                {LANG_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button onClick={() => setTab('review')} className="hidden sm:flex items-center gap-2 text-sm font-medium text-text-secondary hover:text-primary transition-colors">
               <HelpCircle size={18} />
-              <span>समीक्षक लॉगिन</span>
+              <span>{t.reviewer}</span>
             </button>
           </div>
         </div>
@@ -141,11 +161,11 @@ export default function App() {
             <section className="pt-10 pb-8 text-center flex flex-col items-center">
               <div className="bg-[#E6F7F4] text-teal-700 rounded-full px-4 py-1 flex items-center gap-2 text-sm font-medium mb-6">
                 <span className="bg-teal-500 rounded-full w-2 h-2 inline-block"></span>
-                विश्वसनीय नागरिक सहायता मंच • AI एवं विशेषज्ञ समीक्षक आधारित
+                {t.heroBadge}
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-[#111827]">सरकारी नोटिस या योजना पत्र समझने में मदद</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-[#111827]">{t.heroHeading}</h1>
               <p className="mt-4 text-base md:text-lg text-text-secondary max-w-2xl mx-auto">
-                अपने कागज़ात, सरकारी चिट्ठी या योजना फॉर्म की तस्वीर अपलोड करें या सीधे बोलकर सरल हिंदी में अपनी भाषा में सही और स्पष्ट जानकारी प्राप्त करें।
+                {t.heroDesc}
               </p>
             </section>
 
@@ -196,11 +216,11 @@ export default function App() {
                       <div className="bg-primary-light p-4 rounded-xl mb-4">
                         <Upload size={32} strokeWidth={2} className="text-primary" />
                       </div>
-                      <h3 className="text-xl font-bold text-text-primary mb-2">नोटिस की फोटो अपलोड करें</h3>
-                      <p className="text-sm text-text-secondary mb-4 text-center">कागज़ात, सरकारी चिट्ठी या योजना फॉर्म की साफ़ तस्वीर चुनें</p>
+                      <h3 className="text-xl font-bold text-text-primary mb-2">{t.uploadTitle}</h3>
+                      <p className="text-sm text-text-secondary mb-4 text-center">{t.uploadSub}</p>
                       
                       <div className="bg-gray-50 flex items-center gap-2 px-3 py-1.5 rounded-md mb-6 border border-gray-100 text-xs text-text-secondary">
-                        <FileText size={14} /> JPG, PNG या PDF • 10MB तक
+                        <FileText size={14} /> {t.uploadFormats}
                       </div>
 
                       <button
@@ -208,15 +228,15 @@ export default function App() {
                         className="btn-primary flex items-center gap-2 w-full max-w-[240px] justify-center shadow-md shadow-primary/20"
                         disabled={busy}
                       >
-                        <Upload size={18} /> फ़ाइल चुनें
+                        <Upload size={18} /> {t.chooseFile}
                       </button>
-                      <p className="mt-6 text-sm text-text-secondary">या फ़ाइल यहाँ खींचकर छोड़ें (Drag & Drop)</p>
+                      <p className="mt-6 text-sm text-text-secondary">{t.dragDrop}</p>
                     </div>
                     
-                    <button onClick={() => setShowCamera(true)} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between text-text-primary hover:bg-gray-50 transition-colors shadow-sm font-medium group">
+                     <button onClick={() => setShowCamera(true)} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between text-text-primary hover:bg-gray-50 transition-colors shadow-sm font-medium group">
                        <span className="flex items-center gap-3">
                          <QrCode className="text-text-primary" size={20} />
-                         या अपने फ़ोन से स्कैन करें
+                         {t.scanPhone}
                        </span>
                        <span className="text-gray-400 group-hover:text-primary transition-colors text-xl">→</span>
                     </button>
@@ -229,13 +249,13 @@ export default function App() {
                 {/* Featues row below hero */}
                 <div className="hidden lg:grid grid-cols-3 gap-6 max-w-5xl mx-auto mt-8 mb-6">
                    <div className="feature-chip text-text-primary">
-                      <ShieldCheck className="text-blue-500" size={20} /> 100% सुरक्षित एवं निजी
+                      <ShieldCheck className="text-blue-500" size={20} /> {t.featSecure}
                    </div>
                    <div className="feature-chip text-text-primary">
-                      <FileText className="text-indigo-500" size={20} /> सरल कानूनी भाषा
+                      <FileText className="text-indigo-500" size={20} /> {t.featSimple}
                    </div>
                    <div className="feature-chip text-text-primary">
-                      <HelpCircle className="text-primary" size={20} /> समीक्षक सहायता
+                      <HelpCircle className="text-primary" size={20} /> {t.featReview}
                    </div>
                 </div>
               </>
@@ -281,13 +301,13 @@ export default function App() {
                   <ProcessingStages status={result?.status ?? 'queued'} lang={lang} />
                   
                   {/* Extra layout specified in Figma */}
-                  <div className="w-full mt-6 bg-white border border-gray-100 shadow-sm rounded-xl px-4 py-3 flex gap-3 text-left">
+                   <div className="w-full mt-6 bg-white border border-gray-100 shadow-sm rounded-xl px-4 py-3 flex gap-3 text-left">
                      <ShieldCheck className="text-[#0DA883] shrink-0 fill-[#0DA883]/10" size={24} />
-                     <p className="text-sm text-gray-600"><strong className="text-gray-900">डेटा सुरक्षा:</strong> आपके दस्तावेज़ का डेटा 256-बिट एन्क्रिप्टेड और पूरी तरह सुरक्षित है।</p>
+                     <p className="text-sm text-gray-600"><strong className="text-gray-900">{t.dataSecureTitle}</strong> {t.dataSecureBody}</p>
                   </div>
                   
                   <button onClick={() => setJobId(null)} className="mt-8 mb-6 text-gray-600 font-bold text-sm bg-transparent hover:bg-gray-100 px-6 py-2 rounded-full transition-colors">
-                     रद्द करें (Cancel Analysis)
+                     {t.cancelAnalysis}
                   </button>
                 </div>
               )}
@@ -322,10 +342,10 @@ export default function App() {
                     {/* Header Row */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 mt-2">
                       <div className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                         <span className="text-gray-400">←</span> मुख्य पृष्ठ <span className="text-gray-300">/</span> <span className="text-gray-900">नोटिस समीक्षा परिणाम</span>
+                         <span className="text-gray-400">←</span> {t.home} <span className="text-gray-300">/</span> <span className="text-gray-900">{t.resultTitle}</span>
                       </div>
                       <div className="text-xs text-gray-400 flex items-center gap-1 mt-2 sm:mt-0">
-                        <ShieldCheck size={14} /> सुरक्षित नागरिक पोर्टल एन्क्रिप्शन
+                        <ShieldCheck size={14} /> {t.securePortal}
                       </div>
                     </div>
 
@@ -335,15 +355,15 @@ export default function App() {
                       <div className="space-y-4">
                         {/* Summary Header Pill */}
                         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex justify-between items-center text-sm shadow-sm">
-                           <div className="font-semibold text-gray-800 flex items-center gap-2"><FileText size={16} className="text-primary" /> दस्तावेज़ संख्या: {result.jobId?.split('-')[0] || 'MH-PMK-2024-889'}</div>
-                           <div className="text-gray-500 flex items-center gap-2"><Calendar size={16} /> दिनांक: 12 अक्टूबर 2024</div>
+                           <div className="font-semibold text-gray-800 flex items-center gap-2"><FileText size={16} className="text-primary" /> {t.docNo}: {result.jobId?.split('-')[0] || '—'}</div>
+                           <div className="text-gray-500 flex items-center gap-2"><Calendar size={16} /> {t.dateLabel}: {result.fields?.deadlineDate ? formatDate(result.fields.deadlineDate, lang) : '—'}</div>
                         </div>
 
                         <VerdictBanner escalated={result.escalation.flagged} lang={lang} />
                         
                         <div className="bg-blue-50 text-blue-800 text-xs py-2 px-4 rounded-lg flex items-center justify-between">
-                           <div className="flex items-center gap-2"><FileText size={14} /> AI द्वारा विश्लेषित एवं प्रमाणित • नागरिक सहायता प्रणाली</div>
-                           <div className="text-blue-600 font-medium">सत्यापन विवरण ⓘ</div>
+                           <div className="flex items-center gap-2"><FileText size={14} /> {t.aiVerified}</div>
+                           <div className="text-blue-600 font-medium">{t.verifyDetails}</div>
                         </div>
 
                         {result.explanation && (
@@ -359,46 +379,39 @@ export default function App() {
 
                         <div className="card-elevated bg-white">
                           <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
-                            <h3 className="flex items-center gap-2 font-bold text-gray-900"><FileText size={18} className="text-primary" /> मुख्य तथ्य / Quick Summary</h3>
-                            <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full">4 प्रमुख बिंदु</span>
+                            <h3 className="flex items-center gap-2 font-bold text-gray-900"><FileText size={18} className="text-primary" /> {t.quickSummary}</h3>
+                            <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full">4 {t.keyPoints}</span>
                           </div>
                           
                           <div className="space-y-4">
-                            <div className="flex items-start gap-3">
-                               <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5"><Landmark size={16} className="text-gray-500" /></div>
-                               <div>
-                                  <p className="text-xs text-gray-500 font-medium">जारीकर्ता प्राधिकरण (Authority) <span className="inline-block w-1.5 h-1.5 rounded-full bg-teal-500 ml-1"></span></p>
-                                  <p className="font-bold text-gray-900 text-sm">कृषि एवं किसान कल्याण मंत्रालय</p>
-                                  <p className="text-xs text-gray-400">भारत सरकार (GOI)</p>
-                               </div>
-                            </div>
-
-                            <div className="flex items-start gap-3">
-                               <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0 mt-0.5"><Calendar size={16} className="text-orange-500" /></div>
-                               <div>
-                                  <p className="text-xs text-gray-500 font-medium">अंतिम तिथि (Deadline) <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 ml-1"></span></p>
-                                  <p className="font-bold text-gray-900 text-sm text-orange-700">15 नवंबर 2026</p>
-                                  <p className="text-xs text-gray-400">निर्धारित तिथि से पूर्व ई-केवाईसी अवश्य करा लें</p>
-                               </div>
-                            </div>
-                            
-                            <div className="flex items-start gap-3">
-                               <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center shrink-0 mt-0.5"><IndianRupee size={16} className="text-green-600" /></div>
-                               <div>
-                                  <p className="text-xs text-gray-500 font-medium">संबंधित राशि (Amount / Benefit) <span className="inline-block w-1.5 h-1.5 rounded-full bg-teal-500 ml-1"></span></p>
-                                  <p className="font-bold text-gray-900 text-sm text-green-700">₹4,500 <span className="text-gray-500 font-normal">(अगली 2 किश्तें)</span></p>
-                                  <p className="text-xs text-gray-400">सत्यापन के तुरंत बाद बैंक खाते में अंतरित</p>
-                               </div>
-                            </div>
-
-                            <div className="flex items-start gap-3">
-                               <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5"><FileText size={16} className="text-gray-500" /></div>
-                               <div>
-                                  <p className="text-xs text-gray-500 font-medium">आवश्यक दस्तावेज़ (Required Document)</p>
-                                  <p className="font-bold text-gray-900 text-sm">आधार कार्ड एवं बैंक पासबुक</p>
-                                  <p className="text-xs text-gray-400">मूल पहचान पत्र साथ रखें</p>
-                               </div>
-                            </div>
+                            <FieldRow
+                              icon={<Landmark size={16} className="text-gray-500" />}
+                              label={t.authorityLabel}
+                              value={result.fields?.issuingAuthority || '—'}
+                              confidence={result.fields?.fieldConfidence?.issuingAuthority}
+                              lang={lang}
+                            />
+                            <FieldRow
+                              icon={<Calendar size={16} className="text-orange-500" />}
+                              label={t.deadlineLabel}
+                              value={result.fields?.deadlineDate ? formatDate(result.fields.deadlineDate, lang) : '—'}
+                              confidence={result.fields?.fieldConfidence?.deadlineDate}
+                              lang={lang}
+                            />
+                            <FieldRow
+                              icon={<IndianRupee size={16} className="text-green-600" />}
+                              label={t.amountLabel}
+                              value={result.fields?.amountOwed != null ? formatCurrency(result.fields.amountOwed) : '—'}
+                              confidence={result.fields?.fieldConfidence?.amountOwed}
+                              lang={lang}
+                            />
+                            <FieldRow
+                              icon={<FileText size={16} className="text-gray-500" />}
+                              label={t.docLabel}
+                              value={result.fields?.requiredAction || result.fields?.citedSection || '—'}
+                              confidence={result.fields?.fieldConfidence?.requiredAction}
+                              lang={lang}
+                            />
                           </div>
                         </div>
 
@@ -452,11 +465,11 @@ export default function App() {
               <div className="flex items-start md:items-center gap-3">
                  <ShieldCheck size={24} className="text-orange-400 shrink-0" />
                  <p className="text-sm md:text-sm text-gray-200">
-                    <span className="text-orange-400 font-bold">नागरिक सूचना:</span> योजना मित्र केवल सरकारी नोटिस समझने में मदद करता है। यह आधिकारिक सरकारी आदेश नहीं है। आवश्यकता पड़ने पर संबंधित कार्यालय से संपर्क करें।
+                    <span className="text-orange-400 font-bold">{t.citizenNotice}</span> {t.citizenNoticeBody}
                  </p>
               </div>
               <button className="bg-gray-700/50 hover:bg-gray-600 transition-colors text-white px-4 py-2 rounded-lg text-sm font-medium shrink-0 flex items-center gap-1">
-                 समझ गया <CheckCircle2 size={16} />
+                 {t.understood} <CheckCircle2 size={16} />
               </button>
             </div>
           </>
@@ -468,23 +481,23 @@ export default function App() {
         <div className="mx-auto max-w-7xl px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <nav className="flex flex-wrap justify-center md:justify-start gap-4 lg:gap-8">
             <button onClick={() => setTab('how')} className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
-              कैसे काम करता है
+              {t.howTitle}
             </button>
             <button onClick={() => setTab('faq')} className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
-              FAQ
+              {t.faqTitle}
             </button>
             <button onClick={() => setTab('review')} className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
-              समीक्षक लॉगिन
+              {t.reviewer}
             </button>
-            <button className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
-              गोपनीयता नीति
+            <button onClick={() => setTab('faq')} className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+              {t.privacy}
             </button>
-            <button className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
-              नागरिक चार्टर
+            <button onClick={() => setTab('how')} className="text-sm font-medium text-text-secondary hover:text-primary transition-colors">
+              {t.charter}
             </button>
           </nav>
           <div className="text-sm text-text-muted text-center md:text-right">
-             © 2024 योजना मित्र (Yojana Mitra) • नागरिक सेवा मंच. सर्वाधिकार सुरक्षित.
+             {t.copyright}
           </div>
         </div>
       </footer>
