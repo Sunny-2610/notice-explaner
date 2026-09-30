@@ -24,6 +24,9 @@ export interface DocumentResult {
   disclaimerIncluded: boolean;
   escalation: { flagged: boolean; matchedRuleIds: string[] };
   voiceAvailable: boolean;
+  provisional?: boolean;
+  verified?: boolean;
+  reviewReason?: string | null;
   deadline?: {
     daysRemaining: number | null;
     overdue: boolean;
