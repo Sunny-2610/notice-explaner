@@ -291,9 +291,21 @@ class PostgresJobStore:
             (pre.get("matched_rule_ids") if pre else []) + (post.get("matched_rule_ids") if post else [])))
         f = state.get("fields")
         # Keys IDENTICAL to MemoryJobStore.get_result().
+        status = job.get("status")
+        expl_text = expl.get("explanation_text") if expl else None
+        provisional = bool(
+            status == "awaiting_review"
+            and expl_text is not None
+            and job.get("error_code") == "E-401"
+        )
+        verified = bool(
+            status == "completed" and flagged and expl_text is not None
+        )
+        review_reason = job.get("error_code") if status in (
+            "awaiting_review", "completed", "failed") else None
         return {
             "jobId": job_id,
-            "status": job.get("status"),
+            "status": status,
             "errorCode": job.get("error_code"),
             "targetLanguage": job.get("target_language"),
             "documentType": cls.get("document_type") if cls else None,
@@ -306,10 +318,13 @@ class PostgresJobStore:
                 "requiredAction": f.get("required_action") if f else None,
                 "fieldConfidence": f.get("field_confidence") if f else {},
             },
-            "explanation": expl.get("explanation_text") if expl else None,
+            "explanation": expl_text,
             "disclaimerIncluded": expl.get("disclaimer_included", False) if expl else False,
             "escalation": {"flagged": flagged, "matchedRuleIds": matched},
             "voiceAvailable": True,
+            "provisional": provisional,
+            "verified": verified,
+            "reviewReason": review_reason,
         }
 
 
