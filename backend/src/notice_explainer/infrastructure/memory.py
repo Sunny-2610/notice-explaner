@@ -84,9 +84,25 @@ class MemoryJobStore:
         matched = list(dict.fromkeys(
             (pre.matched_rule_ids if pre else []) + (post.matched_rule_ids if post else [])))
         f = self.fields.get(job_id)
+        status = job.status.value
+        # Provisional-first: escalated jobs (E-401) already have an explanation
+        # saved — deliver it immediately while review pends in background.
+        # E-150/E-201 have no explanation so they stay blocked.
+        provisional = bool(
+            status == JobStatus.AWAITING_REVIEW.value
+            and expl is not None
+            and job.error_code == "E-401"
+        )
+        # Verified = escalated job that a reviewer resolved to completed.
+        verified = bool(
+            status == JobStatus.COMPLETED.value and flagged and expl is not None
+        )
+        review_reason = job.error_code if status in (
+            JobStatus.AWAITING_REVIEW.value, JobStatus.COMPLETED.value,
+            JobStatus.FAILED.value) else None
         return {
             "jobId": job_id,
-            "status": job.status.value,
+            "status": status,
             "errorCode": job.error_code,
             "targetLanguage": job.target_language,
             "documentType": cls.document_type.value if cls else None,
@@ -103,6 +119,9 @@ class MemoryJobStore:
             "disclaimerIncluded": expl.disclaimer_included if expl else False,
             "escalation": {"flagged": flagged, "matchedRuleIds": matched},
             "voiceAvailable": True,
+            "provisional": provisional,
+            "verified": verified,
+            "reviewReason": review_reason,
         }
 
 
