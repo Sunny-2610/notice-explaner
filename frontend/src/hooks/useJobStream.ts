@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { fetchResult, type DocumentResult } from '../lib/api';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '';
-const TERMINAL = new Set(['completed', 'awaiting_review', 'failed']);
+// Provisional-first: completed/failed are final. awaiting_review WITH an
+// explanation (E-401 provisional) keeps polling/streaming for the later
+// verified resolve. awaiting_review WITHOUT explanation (E-150/E-201) stops.
+const FINAL = new Set(['completed', 'failed']);
 // Poll fallback mirrors useJobPoll: 60 attempts at 1.5s ≈ 90s.
 const MAX_ATTEMPTS = 60;
 const INTERVAL_MS = 1500;
@@ -31,7 +34,9 @@ export function useJobStream(jobId: string | null) {
         .then((r) => {
           if (stop) return;
           setResult(r);
-          if (TERMINAL.has(r.status)) return;
+          if (FINAL.has(r.status)) return;
+          // Blocked review with nothing to show yet — stop polling.
+          if (r.status === 'awaiting_review' && !r.explanation) return;
           if (attempts + 1 >= MAX_ATTEMPTS) {
             setTimedOut(true);
             return;
@@ -64,10 +69,16 @@ export function useJobStream(jobId: string | null) {
       try {
         const payload = JSON.parse((e as MessageEvent).data) as DocumentResult;
         if (!stop) setResult(payload);
+        // Provisional result (awaiting_review + explanation): keep the
+        // stream open for the verified resolve. Final results close it.
+        const isProvisional = Boolean(
+          (payload as DocumentResult).provisional ||
+          (payload.status === 'awaiting_review' && payload.explanation),
+        );
+        if (!isProvisional) es?.close();
       } catch {
         /* malformed frame — polling fallback below covers it */
       }
-      es?.close();
     });
     es.addEventListener('timeout', () => {
       if (!stop) setTimedOut(true);
