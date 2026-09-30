@@ -57,6 +57,36 @@ FALLBACK = {
 MAX_TOOL_CALLS = 3
 
 
+def _content_to_text(content) -> str:
+    """Collapse LangChain message content to plain text.
+
+    Newer langchain-google-genai versions return a list of content blocks
+    like [{'type': 'text', 'text': '...', 'extras': {'signature': ...}}]
+    instead of a bare string. Stringifying that list leaks the
+    ``[{'type': 'text', ...}]`` repr + thought signature into the chat UI,
+    which is exactly the reported bug. Extract only the text parts.
+    """
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+            elif isinstance(block, dict):
+                t = block.get("text")
+                if isinstance(t, str) and t:
+                    parts.append(t)
+            else:
+                for attr in ("text", "content"):
+                    v = getattr(block, attr, None)
+                    if isinstance(v, str) and v:
+                        parts.append(v)
+                        break
+        return "\n".join(parts).strip()
+    return str(content)
+
+
 class QAAgent:
     def __init__(self, retriever=None):
         self._llm = None
@@ -102,9 +132,7 @@ class QAAgent:
                 {"messages": [("user", f"[{target_language}] {question}")]},
                 config={"recursion_limit": 12},
             )
-            answer = result["messages"][-1].content
-            if not isinstance(answer, str):
-                answer = str(answer)
+            answer = _content_to_text(result["messages"][-1].content)
 
             # Deterministic Sources list from retrieved chunks only — never
             # trust the model to cite. Placed BEFORE the disclaimer.
