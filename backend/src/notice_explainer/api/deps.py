@@ -35,29 +35,31 @@ review_queue = MemoryReviewQueue()
 
 # Optional Postgres job/image stores (compose sets DATABASE_URL); memory otherwise.
 # Mirrors the audit try/except pattern: tests keep working with no DATABASE_URL set.
-try:
-    if os.getenv("DATABASE_URL"):
+if os.getenv("DATABASE_URL"):
+    try:
         from ..infrastructure.postgres import PostgresImageStore, PostgresJobStore
 
         job_store = PostgresJobStore()  # type: ignore[assignment]
         image_store = PostgresImageStore()  # type: ignore[assignment]
-    else:
-        raise RuntimeError("DATABASE_URL unset — memory job/image stores")
-except Exception as exc:
-    print(f"deps: memory job/image store fallback ({exc})")
+    except Exception as exc:
+        print(f"CRITICAL: Failed to connect to Postgres! DATABASE_URL is set but connection failed: {exc}")
+        raise RuntimeError(f"Database connection failed: {exc}")
+else:
+    print("deps: DATABASE_URL unset — using memory job/image stores")
     job_store = MemoryJobStore()
     image_store = MemoryImageStore()
 
 # Optional Postgres audit (compose sets DATABASE_URL); memory otherwise.
-try:
-    if os.getenv("DATABASE_URL"):
+if os.getenv("DATABASE_URL"):
+    try:
         from ..infrastructure.postgres import PostgresAuditLogger
 
         audit = PostgresAuditLogger()  # type: ignore[assignment]
-    else:
-        raise RuntimeError("DATABASE_URL unset — memory audit")
-except Exception as exc:
-    print(f"deps: memory audit fallback ({exc})")
+    except Exception as exc:
+        print(f"CRITICAL: Failed to connect to Postgres for audit log! {exc}")
+        raise RuntimeError(f"Audit database connection failed: {exc}")
+else:
+    print("deps: DATABASE_URL unset — using memory audit")
     audit = MemoryAuditLogger()
 
 # Optional Redis job queue; None -> FastAPI BackgroundTasks inline run.
