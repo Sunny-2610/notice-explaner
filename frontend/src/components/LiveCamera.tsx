@@ -92,14 +92,14 @@ export default function LiveCamera({
         {/* Content Body */}
         <div className="flex-1 px-4 flex flex-col max-w-lg mx-auto w-full pb-8">
            
-           <div className="flex justify-center mb-4 mt-2">
-              <div className="bg-blue-50/80 border border-blue-100 px-4 py-2 rounded-lg flex items-center gap-2">
-                 <CheckCircle2 className="text-green-600" size={18} />
-                 <span className="text-xs md:text-sm font-bold text-gray-800">दस्तावेज़ स्पष्ट पहचाना गया (Property Tax Notice)</span>
-              </div>
-           </div>
+            <div className="flex justify-center mb-4 mt-2 px-2">
+               <div className="bg-blue-50/80 border border-blue-100 px-4 py-2 rounded-lg flex flex-wrap items-center justify-center gap-2 text-center max-w-full">
+                  <CheckCircle2 className="text-green-600 shrink-0" size={18} />
+                  <span className="text-xs md:text-sm font-bold text-gray-800 break-words">दस्तावेज़ स्पष्ट पहचाना गया (Property Tax Notice)</span>
+               </div>
+            </div>
 
-           <div className="relative rounded-2xl overflow-hidden bg-gray-100 shadow-md mb-6 relative w-full aspect-[3/4] max-h-[50vh]">
+            <div className="relative rounded-2xl overflow-hidden bg-gray-100 shadow-md mb-6 w-full aspect-[3/4] max-h-[50vh]">
              <img src={preview.url} alt="" className="w-full h-full object-cover" />
              {/* Reticle brackets corners */}
              <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-primary border-r-0 border-b-0 pointer-events-none"></div>
@@ -132,14 +132,14 @@ export default function LiveCamera({
              </div>
            </div>
            
-           <div className="flex gap-4 mt-auto">
-             <button onClick={() => setPreview(null)} className="flex-1 bg-white border border-gray-300 text-gray-800 rounded-xl py-3.5 font-bold flex justify-center items-center gap-2 shadow-sm">
-               <RotateCcw size={18} /> पुनः लें
-             </button>
-             <button onClick={() => onCapture(preview.file)} className="flex-1 bg-primary text-white rounded-xl py-3.5 font-bold flex justify-center items-center gap-2 shadow-md shadow-primary/20">
-               <Check size={18} /> यह फोटो उपयोग करें
-             </button>
-           </div>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-auto">
+              <button onClick={() => setPreview(null)} className="flex-1 bg-white border border-gray-300 text-gray-800 rounded-xl py-3.5 min-h-[48px] font-bold flex justify-center items-center gap-2 shadow-sm">
+                <RotateCcw size={18} /> पुनः लें
+              </button>
+              <button onClick={() => onCapture(preview.file)} className="flex-1 bg-primary text-white rounded-xl py-3.5 min-h-[48px] font-bold flex justify-center items-center gap-2 shadow-md shadow-primary/20">
+                <Check size={18} /> यह फोटो उपयोग करें
+              </button>
+            </div>
 
         </div>
       </div>
@@ -159,10 +159,10 @@ export default function LiveCamera({
         <FileText size={16} strokeWidth={1.75} aria-hidden /> {t.cameraHelp}
       </p>
       <div className="flex gap-2">
-        <button onClick={capture} className="btn-primary flex-1 inline-flex items-center justify-center gap-2">
+        <button onClick={capture} className="btn-primary flex-[3] inline-flex items-center justify-center gap-2 min-h-[48px]">
           <Camera size={20} strokeWidth={1.75} aria-hidden /> {t.capture}
         </button>
-        <button onClick={onClose} className="btn-secondary flex-1 inline-flex items-center justify-center" aria-label="Close">
+        <button onClick={onClose} className="btn-secondary flex-1 inline-flex items-center justify-center min-h-[48px] px-4" aria-label="Close">
           <X size={20} strokeWidth={1.75} aria-hidden />
         </button>
       </div>

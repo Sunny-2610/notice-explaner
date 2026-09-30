@@ -110,8 +110,10 @@ export default function VoiceRecorder({
   return (
     <div className={`${variant === 'hero' ? 'bg-white border border-border shadow-sm rounded-2xl flex flex-col items-center justify-center p-8 min-h-[460px] max-w-sm mx-auto w-full relative' : 'card text-center'}`}>
       {variant === 'hero' && (
-        <div className="absolute top-6 bg-primary-light text-primary font-medium text-xs px-4 py-1.5 rounded-full flex items-center gap-2">
-          <Mic size={14} /> तुरंत सहायता / Instant Voice Assistant
+        <div className="absolute top-6 inset-x-0 flex justify-center pointer-events-none">
+          <span className="bg-primary-light text-primary font-medium text-xs px-4 py-1.5 rounded-full flex items-center gap-2">
+            <Mic size={14} /> तुरंत सहायता / Instant Voice Assistant
+          </span>
         </div>
       )}
       {variant === 'hero' ? (
@@ -170,7 +172,7 @@ export default function VoiceRecorder({
                 else void start();
               }
             }}
-            style={{ touchAction: 'none' }}
+            style={{ touchAction: 'pan-y' }}
             className={`btn-primary w-full shadow-lg shadow-primary/20 flex justify-center items-center gap-2 text-base ${variant === 'hero' ? 'bg-primary-light !text-primary hover:bg-primary hover:!text-white' : 'mt-3'}`}
           >
             <Mic size={20} /> बोलने के लिए दबाकर रखें (Hold to Speak)
