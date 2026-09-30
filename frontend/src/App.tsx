@@ -109,13 +109,13 @@ export default function App() {
 
       {/* Header: brand + always-visible language selector */}
       <header className="bg-white border-b border-border sticky top-0 z-50">
-        <div className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
-          <button onClick={() => setTab('explain')} className="flex items-center gap-3">
-             <div className="bg-primary text-white p-2 rounded-xl flex items-center justify-center">
-               <Landmark size={24} strokeWidth={2} />
-             </div>
-              <div className="flex flex-col text-left text-text-primary">
-                <span className="text-lg font-bold leading-tight">योजना मित्र / Yojana Mitra</span>
+        <div className="mx-auto max-w-7xl px-3 sm:px-4 min-h-[64px] py-2 flex items-center justify-between gap-2 sm:gap-4">
+          <button onClick={() => setTab('explain')} className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="bg-primary text-white p-2 rounded-xl flex items-center justify-center shrink-0">
+                <Landmark size={24} strokeWidth={2} />
+              </div>
+               <div className="flex flex-col text-left text-text-primary min-w-0">
+                <span className="text-base sm:text-lg font-bold leading-tight truncate">योजना मित्र / Yojana Mitra</span>
                 <span className="text-xs text-text-secondary hidden sm:block">{t.brandSub}</span>
               </div>
            </button>
@@ -124,8 +124,8 @@ export default function App() {
             <button onClick={() => setTab('how')} className="hover:text-primary transition-colors">{t.navEligibility}</button>
             <button onClick={() => setTab('faq')} className="hover:text-primary transition-colors">{t.navSupport}</button>
           </nav>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 px-4 py-2 rounded-full border border-border hover:bg-gray-50 transition-colors text-sm font-medium text-text-primary cursor-pointer">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <label className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full border border-border hover:bg-gray-50 transition-colors text-sm font-medium text-text-primary cursor-pointer">
               <Languages size={18} className="text-primary" />
               <span className="sr-only">{t.language}</span>
               <select
@@ -149,7 +149,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl lg:max-w-4xl px-4 pb-16">
+      <main className="mx-auto max-w-xl lg:max-w-5xl xl:max-w-6xl px-4 pb-16">
         {tab === 'review' ? (
           <ReviewQueue lang={lang} />
         ) : tab === 'how' ? (
@@ -160,7 +160,7 @@ export default function App() {
           <>
             {/* Updated Hero Section */}
             <section className="pt-10 pb-8 text-center flex flex-col items-center">
-              <div className="bg-[#E6F7F4] text-teal-700 rounded-full px-4 py-1 flex items-center gap-2 text-sm font-medium mb-6">
+              <div className="bg-[#E6F7F4] text-teal-700 rounded-full px-4 py-1 flex flex-wrap items-center justify-center gap-2 text-sm font-medium mb-6 max-w-full text-center">
                 <span className="bg-teal-500 rounded-full w-2 h-2 inline-block"></span>
                 {t.heroBadge}
               </div>
@@ -345,11 +345,11 @@ export default function App() {
                         result.explanation &&
                         result.errorCode !== 'E-201'),
                   )) && (
-                  <div className="max-w-6xl mx-auto w-full">
+                  <div className="max-w-6xl mx-auto w-full min-w-0">
                     {/* Header Row */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 mt-2">
-                      <div className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                         <span className="text-gray-400">←</span> {t.home} <span className="text-gray-300">/</span> <span className="text-gray-900">{t.resultTitle}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-4 mt-2">
+                      <div className="text-sm font-medium text-gray-500 flex flex-wrap items-center gap-2 min-w-0">
+                         <span className="text-gray-400">←</span> {t.home} <span className="text-gray-300">/</span> <span className="text-gray-900 break-words">{t.resultTitle}</span>
                       </div>
                       <div className="text-xs text-gray-400 flex items-center gap-1 mt-2 sm:mt-0">
                         <ShieldCheck size={14} /> {t.securePortal}
@@ -361,9 +361,9 @@ export default function App() {
                       {/* Left Column */}
                       <div className="space-y-4">
                         {/* Summary Header Pill */}
-                        <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex justify-between items-center text-sm shadow-sm">
-                           <div className="font-semibold text-gray-800 flex items-center gap-2"><FileText size={16} className="text-primary" /> {t.docNo}: {result.jobId?.split('-')[0] || '—'}</div>
-                           <div className="text-gray-500 flex items-center gap-2"><Calendar size={16} /> {t.dateLabel}: {result.fields?.deadlineDate ? formatDate(result.fields.deadlineDate, lang) : '—'}</div>
+                        <div className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 text-sm shadow-sm">
+                           <div className="font-semibold text-gray-800 flex items-center gap-2 min-w-0"><FileText size={16} className="text-primary shrink-0" /> <span className="truncate">{t.docNo}: {result.jobId?.split('-')[0] || '—'}</span></div>
+                           <div className="text-gray-500 flex items-center gap-2 min-w-0"><Calendar size={16} className="shrink-0" /> <span className="truncate">{t.dateLabel}: {result.fields?.deadlineDate ? formatDate(result.fields.deadlineDate, lang) : '—'}</span></div>
                         </div>
 
                         <VerdictBanner escalated={result.escalation.flagged} lang={lang} />
@@ -475,7 +475,7 @@ export default function App() {
 
             {/* New Dark Disclaimer Banner */}
             <div
-              className={`bg-[#202735] text-white rounded-xl p-4 flex items-center justify-between gap-4 mt-8 ${jobId ? 'disclaimer-sticky lg:max-w-5xl lg:mx-auto' : 'max-w-5xl mx-auto'}`}
+              className={`bg-[#202735] text-white rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mt-8 ${jobId ? 'disclaimer-sticky lg:max-w-5xl lg:mx-auto' : 'max-w-5xl mx-auto'}`}
             >
               <div className="flex items-start md:items-center gap-3">
                  <ShieldCheck size={24} className="text-orange-400 shrink-0" />
@@ -483,7 +483,7 @@ export default function App() {
                     <span className="text-orange-400 font-bold">{t.citizenNotice}</span> {t.citizenNoticeBody}
                  </p>
               </div>
-              <button className="bg-gray-700/50 hover:bg-gray-600 transition-colors text-white px-4 py-2 rounded-lg text-sm font-medium shrink-0 flex items-center gap-1">
+              <button className="bg-gray-700/50 hover:bg-gray-600 transition-colors text-white px-4 py-2 min-h-[44px] rounded-lg text-sm font-medium shrink-0 flex items-center gap-1 self-start sm:self-center">
                  {t.understood} <CheckCircle2 size={16} />
               </button>
             </div>
