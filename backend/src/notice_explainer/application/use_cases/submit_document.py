@@ -1,6 +1,6 @@
 """Submit-document use case (LLD §2.1 + §5).
 
-Validates ingestion (10MB, jpeg/png, hi/mr) then creates job + stores image.
+Validates ingestion (10MB, jpeg/png, hi/mr/en) then creates job + stores image.
 Raises ValidationError with ErrorCode for API -> HTTP 400 mapping.
 """
 from __future__ import annotations

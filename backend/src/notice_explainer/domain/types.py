@@ -47,9 +47,8 @@ class EscalationStage(str, Enum):
     POST_EXPLANATION = "post_explanation"
 
 
-# Launch languages only (BRS §8). New languages extend translation/voice
-# config; reasoning and escalation logic must not change.
-SUPPORTED_LANGUAGES = ("hi", "mr")
+# Launch + English (config-only extension; reasoning and escalation logic unchanged).
+SUPPORTED_LANGUAGES = ("hi", "mr", "en")
 
 # LLD-verified numeric limits. Do not retune without updating docs.
 EXTRACTION_CONFIDENCE_THRESHOLD = 0.55

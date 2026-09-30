@@ -116,3 +116,19 @@ def test_validation_400_on_bad_type_and_language():
     assert bad.status_code == 400
     bad_lang = _submit(client, b"FAKE-JPEG-PROPERTY-TAX", lang="fr")
     assert bad_lang.status_code == 400
+
+
+def test_english_happy_path_completed_with_disclaimer():
+    client = _fresh_app()
+    r = _submit(client, b"FAKE-JPEG-PROPERTY-TAX", lang="en")
+    assert r.status_code == 202
+    job_id = r.json()["jobId"]
+    import time
+    for _ in range(50):
+        g = client.get(f"/api/v1/documents/{job_id}").json()
+        if g["status"] in ("completed", "awaiting_review", "failed"):
+            break
+        time.sleep(0.05)
+    assert g["status"] == "completed", g
+    assert g["disclaimerIncluded"] is True
+    assert "not legal advice" in (g["explanation"] or "").lower()
