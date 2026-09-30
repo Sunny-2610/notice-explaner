@@ -29,19 +29,19 @@ export default function ProgressiveExplanation({ text, lang }: { text: string; l
 
   return (
     <article className="mt-4">
-      <div className="flex items-center gap-2 text-sm text-gray-500 mb-6 bg-white py-4 px-1 rounded-xl">
+      <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-1 text-xs sm:text-sm text-gray-500 mb-6 bg-white py-4 px-2 rounded-xl overflow-x-auto">
         {labels.map((label, i) => (
-          <span key={label} className="flex items-center gap-2">
-            {i > 0 && <span className="h-px bg-gray-300 w-8 mx-2" />}
-            <span className="flex items-center gap-1 font-medium">
+          <span key={label} className="flex items-center gap-1 min-w-0">
+            {i > 0 && <span className="h-px bg-gray-300 w-4 sm:w-8 mx-1 sm:mx-2 shrink-0" />}
+            <span className="flex items-center gap-1 font-medium min-w-0">
               <span
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 ${
                   i <= step ? 'bg-primary text-white font-bold' : 'bg-gray-100 text-gray-500'
                 }`}
               >
                 {i + 1}
               </span>
-              <span className={i <= step ? 'font-bold text-primary' : ''}>{label}</span>
+              <span className={`truncate max-w-[90px] sm:max-w-none ${i <= step ? 'font-bold text-primary' : ''}`}>{label}</span>
             </span>
           </span>
         ))}
@@ -52,7 +52,7 @@ export default function ProgressiveExplanation({ text, lang }: { text: string; l
           <FileText size={14} /> {t.keyFacts}
         </span>
         {visible.map((p, i) => (
-          <p key={i} className="text-gray-700 leading-relaxed">
+          <p key={i} className="text-gray-700 leading-relaxed break-words">
             {p}
           </p>
         ))}

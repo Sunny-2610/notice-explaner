@@ -42,9 +42,9 @@ export default function FieldRow({
         <span className="field-icon" aria-hidden>
           {icon}
         </span>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <p className="field-label">{label}</p>
-          <p className="field-value">{value}</p>
+          <p className="field-value break-words">{value}</p>
         </div>
         <span
           aria-hidden
