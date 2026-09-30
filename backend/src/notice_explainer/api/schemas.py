@@ -42,6 +42,13 @@ class DocumentResult(BaseModel):
     escalation: EscalationPayload = EscalationPayload(flagged=False)
     voiceAvailable: bool = True
     deadline: DeadlineInfo | None = None
+    # Provisional-first delivery (instant answer + async expert review).
+    # provisional=True means AI answer is shown but expert check is pending
+    # (awaiting_review + E-401 with explanation saved). verified=True means
+    # a human reviewer approved/edited and status flipped to completed.
+    provisional: bool = False
+    verified: bool = False
+    reviewReason: str | None = None
 
 
 class ReviewItem(BaseModel):
