@@ -7,6 +7,7 @@ import VoicePlayer from './components/VoicePlayer';
 import VoiceRecorder from './components/VoiceRecorder';
 import LiveCamera from './components/LiveCamera';
 import VerdictBanner from './components/VerdictBanner';
+import ProvisionalBanner from './components/ProvisionalBanner';
 import ProgressiveExplanation from './components/ProgressiveExplanation';
 import FollowUpQA from './components/FollowUpQA';
 import FieldRow from './components/FieldRow';
@@ -337,7 +338,13 @@ export default function App() {
 
             {terminal && result && (
               <section className="mt-4 space-y-4">
-                {result.status === 'completed' && (
+                {(result.status === 'completed' ||
+                  Boolean(
+                    (result as any).provisional ||
+                      (result.status === 'awaiting_review' &&
+                        result.explanation &&
+                        result.errorCode !== 'E-201'),
+                  )) && (
                   <div className="max-w-6xl mx-auto w-full">
                     {/* Header Row */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 mt-2">
@@ -360,6 +367,14 @@ export default function App() {
                         </div>
 
                         <VerdictBanner escalated={result.escalation.flagged} lang={lang} />
+
+                        {(Boolean((result as any).provisional) ||
+                          result.status === 'awaiting_review') && (
+                          <ProvisionalBanner
+                            lang={lang}
+                            verified={Boolean((result as any).verified)}
+                          />
+                        )}
                         
                         <div className="bg-blue-50 text-blue-800 text-xs py-2 px-4 rounded-lg flex items-center justify-between">
                            <div className="flex items-center gap-2"><FileText size={14} /> {t.aiVerified}</div>
@@ -436,7 +451,7 @@ export default function App() {
                     </button>
                   </div>
                 )}
-                {result.status === 'awaiting_review' && result.errorCode !== 'E-201' && (
+                {result.status === 'awaiting_review' && result.errorCode !== 'E-201' && !result.explanation && (
                   <div className="card">
                     <p className="chip-warning self-start">{result.errorCode ?? 'review'}</p>
                     <p className="text-base mt-2">{t.underReview}</p>
