@@ -94,7 +94,7 @@ export default function LegalAidCard({ lang }: { lang: Lang }) {
         {entries.map((e) => (
           <li
             key={`${e.name}-${e.phone ?? ''}`}
-            className="flex items-center gap-2"
+            className="flex flex-col sm:flex-row sm:items-center gap-2"
           >
             <div className="flex-1 min-w-0">
               <p className="text-base font-medium truncate">{e.name}</p>
