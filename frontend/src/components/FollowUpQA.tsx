@@ -131,21 +131,21 @@ export default function FollowUpQA({
           }}
           placeholder={t.askPlaceholder}
           disabled={busy || items.length >= MAX_Q}
-          className="w-full border border-gray-300 rounded-xl pl-4 pr-24 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-60"
+          className="w-full border border-gray-300 rounded-xl pl-4 pr-32 sm:pr-36 py-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-60"
         />
         <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
           <button
             onClick={() => void onMic()}
             disabled={voice.busy || busy || voice.mode === 'none' || items.length >= MAX_Q}
             title={t.voiceTitle}
-            className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-40"
+            className="min-w-[44px] min-h-[44px] p-2 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-40 flex items-center justify-center"
           >
             <Mic size={18} />
           </button>
           <button
             onClick={() => void ask(input)}
             disabled={busy || !input.trim() || items.length >= MAX_Q}
-            className="bg-primary text-white rounded-lg px-3 py-1.5 flex items-center gap-1 text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
+            className="bg-primary text-white rounded-lg px-3 py-2.5 min-h-[44px] flex items-center gap-1 text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
           >
             {busy ? '…' : t.askButton} <Send size={14} />
           </button>
