@@ -55,6 +55,10 @@ export default function App() {
   const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const desktopFileRef = useRef<HTMLInputElement>(null);
+  // Gallery picker: same flow as fileRef but WITHOUT capture="environment",
+  // so mobile users get a real choice (camera vs gallery) instead of a
+  // forced camera on Android file pickers.
+  const galleryRef = useRef<HTMLInputElement>(null);
   const t = STRINGS[lang];
   const { result, error: pollError, timedOut } = useJobPoll(jobId);
 
@@ -183,28 +187,42 @@ export default function App() {
                   }}
                   onFallback={() => {
                     setShowCamera(false);
-                    fileRef.current?.click();
+                    galleryRef.current?.click();
                   }}
                   onClose={() => setShowCamera(false)}
                 />
               </div>
             ) : (
               <>
-                {/* Mobile: camera-first, stacked */}
+                {/* Mobile: take-photo + upload choice, stacked full-width so
+                    both fit 320px; side-by-side from sm up. */}
                 <div className="grid gap-3 lg:hidden">
-                  <button
-                    onClick={() => setShowCamera(true)}
-                    className="camera-card"
-                    aria-label={t.cameraTitle}
-                    disabled={busy}
-                  >
-                    <div className="camera-icon text-text-secondary" aria-hidden>
-                      <Camera size={48} strokeWidth={1.75} />
-                    </div>
-                    <h3 className="camera-title">{t.cameraTitle}</h3>
-                    <p className="camera-subtitle">{t.cameraSub}</p>
-                    <span className="camera-cta">{t.cameraCta}</span>
-                  </button>
+                  <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setShowCamera(true)}
+                      className="camera-card !aspect-auto min-h-[148px] py-6"
+                      aria-label={t.cameraTitle}
+                      disabled={busy}
+                    >
+                      <div className="camera-icon text-text-secondary" aria-hidden>
+                        <Camera size={40} strokeWidth={1.75} />
+                      </div>
+                      <h3 className="camera-title text-center leading-snug">{t.cameraTitle}</h3>
+                      <span className="camera-cta">{t.cameraCta}</span>
+                    </button>
+                    <button
+                      onClick={() => galleryRef.current?.click()}
+                      className="w-full rounded-2xl border-2 border-dashed border-gray-300 bg-white flex flex-col items-center justify-center gap-2 min-h-[148px] py-6 active:bg-gray-100 transition-colors"
+                      aria-label={t.uploadGallery}
+                      disabled={busy}
+                    >
+                      <div className="text-text-secondary" aria-hidden>
+                        <Upload size={40} strokeWidth={1.75} />
+                      </div>
+                      <span className="text-base font-semibold text-text-primary text-center leading-snug px-2">{t.uploadGallery}</span>
+                      <span className="text-xs text-text-secondary">{t.uploadFormatsShort}</span>
+                    </button>
+                  </div>
                   <VoiceRecorder jobId={jobId} lang={lang} variant="hero" onTranscript={setPendingQuestion} />
                 </div>
                 {/* Desktop: upload-first peer grid (QR-to-mobile flow intentionally
@@ -277,6 +295,19 @@ export default function App() {
             {/* Desktop picker: same flow, no capture hint for file pickers */}
             <input
               ref={desktopFileRef}
+              type="file"
+              accept="image/jpeg,image/png"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) submitFile(f);
+                e.target.value = '';
+              }}
+            />
+            {/* Gallery picker (mobile upload choice): no capture attribute so
+                the OS offers camera + gallery instead of forcing camera. */}
+            <input
+              ref={galleryRef}
               type="file"
               accept="image/jpeg,image/png"
               className="hidden"
