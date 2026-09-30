@@ -27,7 +27,7 @@ export default function ProcessingStages({ status, lang }: { status: string; lan
       <div className="text-center pt-8 mb-2">
          <h2 className="text-2xl font-bold text-gray-900 mb-1">दस्तावेज़ का विश्लेषण हो रहा है</h2>
          <p className="text-gray-500 text-sm mb-6">Analyzing your document</p>
-         <div className="inline-flex items-center gap-1.5 bg-[#F3F4F6] text-gray-600 px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm">
+          <div className="inline-flex flex-wrap justify-center text-center items-center gap-1.5 bg-[#F3F4F6] text-gray-600 px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm max-w-full">
             <Clock size={14} className="text-primary" /> अनुमानित समय: ~15 सेकंड (Est. 15s)
          </div>
       </div>
@@ -69,11 +69,11 @@ export default function ProcessingStages({ status, lang }: { status: string; lan
                      )}
                    </div>
 
-                   {/* Content */}
-                   <div className={`flex-1 pb-6 ${isActive ? 'bg-blue-50/40 rounded-xl px-3 py-2 -mt-1 -mx-3 border border-blue-100' : 'pt-1'}`}>
-                      <div className="flex items-start justify-between">
-                         <div className="">
-                            <h4 className={`text-lg font-bold leading-tight ${isPending ? 'text-gray-400' : 'text-gray-900'} mb-1`}>{stage[lang]}</h4>
+                    {/* Content */}
+                    <div className={`flex-1 min-w-0 pb-6 ${isActive ? 'bg-blue-50/40 rounded-xl px-3 py-2 -mt-1 -mx-3 border border-blue-100' : 'pt-1'}`}>
+                       <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                             <h4 className={`text-lg font-bold leading-tight break-words ${isPending ? 'text-gray-400' : 'text-gray-900'} mb-1`}>{stage[lang]}</h4>
                             <p className={`${isActive ? 'text-primary' : 'text-gray-500'} text-xs font-medium`}>{stage.en}</p>
                          </div>
                          {/* Badges */}
@@ -98,8 +98,8 @@ export default function ProcessingStages({ status, lang }: { status: string; lan
             <div className="absolute top-0 bottom-0 left-0 bg-primary/80 transition-all duration-300" style={{ width: `${progressPercent}%` }}></div>
          </div>
 
-         {/* Footer text */}
-         <div className="mt-4 flex items-center justify-center gap-1.5 text-xs font-medium text-gray-500">
+          {/* Footer text */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5 text-xs font-medium text-gray-500 text-center">
             <Clock size={14} /> आमतौर पर 15 सेकंड से कम समय लगता है (Usually {"<"}15 seconds)
          </div>
       </div>

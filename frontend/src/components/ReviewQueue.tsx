@@ -173,7 +173,7 @@ export default function ReviewQueue({ lang }: { lang: Lang }) {
                 selected === i.jobId ? 'border-2 border-primary' : ''
               }`}
             >
-              <span className="font-mono text-sm">{i.jobId}</span>
+              <span className="font-mono text-sm break-all">{i.jobId}</span>
               <span className="ml-2 inline-flex flex-wrap gap-1">
                 <span className="chip-warning">{i.routedReason}</span>
                 {docTypes[i.jobId] && <span className="chip-info">{docTypes[i.jobId]}</span>}
@@ -214,7 +214,7 @@ export default function ReviewQueue({ lang }: { lang: Lang }) {
                 onChange={(e) => setEditText(e.target.value)}
                 className="w-full min-h-[160px] rounded-xl border-2 border-border p-3 text-base bg-white"
               />
-              <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={() => decide('edit', editText)}
                   disabled={busy || !editText.trim()}
@@ -228,11 +228,11 @@ export default function ReviewQueue({ lang }: { lang: Lang }) {
               </div>
             </div>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => decide('approve')}
                 disabled={busy}
-                className="btn-primary flex-1 inline-flex items-center justify-center gap-2 disabled:opacity-40"
+                className="btn-primary flex-1 inline-flex items-center justify-center gap-2 disabled:opacity-40 min-h-[48px]"
               >
                 <Check size={18} strokeWidth={1.75} aria-hidden /> Approve (A)
               </button>
