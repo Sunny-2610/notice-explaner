@@ -25,6 +25,18 @@ const CONTENT: Record<Lang, { title: string; steps: { h: string; p: string }[]; 
     ],
     note: 'ही सिस्टीम नोटीस दाखल, उत्तर, भरणा किंवा निकाली काढत नाही — फक्त समजावून सांगते।',
   },
+  en: {
+    title: 'How it works',
+    steps: [
+      { h: '1. Upload a photo', p: 'Take a clear photo of the notice — JPG/PNG, up to 10MB. Choose a language: Hindi, Marathi, or English.' },
+      { h: '2. Read + identify', p: 'The system extracts the text and identifies the notice type: property tax, traffic challan/summons, bank recovery — the rest is “not supported”.' },
+      { h: '3. Extract key details', p: 'Authority, deadline, amount, section, what to do — each field with a confidence score.' },
+      { h: '4. Seriousness check (twice)', p: 'A rule-based check runs twice — once on the original text, once on the generated explanation. Words like summons, warrant/arrest, auction/seizure, or court route the case to human review. When in doubt, it is reviewed.' },
+      { h: '5. Explanation in simple language', p: 'A simple explanation in your chosen language — always ending with “this is not legal advice”. Serious cases also advise seeing a lawyer.' },
+      { h: '6. Review and delivery', p: 'Human review for low confidence or serious flags. The photo is deleted immediately — the audit keeps only essential fields.' },
+    ],
+    note: 'This system never files, replies to, pays, or settles a notice — it only explains it.',
+  },
 };
 
 export default function HowItWorks({ lang }: { lang: Lang }) {

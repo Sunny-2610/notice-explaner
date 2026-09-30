@@ -73,7 +73,7 @@ export default function ProcessingStages({ status, lang }: { status: string; lan
                    <div className={`flex-1 pb-6 ${isActive ? 'bg-blue-50/40 rounded-xl px-3 py-2 -mt-1 -mx-3 border border-blue-100' : 'pt-1'}`}>
                       <div className="flex items-start justify-between">
                          <div className="">
-                            <h4 className={`text-lg font-bold leading-tight ${isPending ? 'text-gray-400' : 'text-gray-900'} mb-1`}>{lang === 'mr' ? stage.mr : stage.hi}</h4>
+                            <h4 className={`text-lg font-bold leading-tight ${isPending ? 'text-gray-400' : 'text-gray-900'} mb-1`}>{stage[lang]}</h4>
                             <p className={`${isActive ? 'text-primary' : 'text-gray-500'} text-xs font-medium`}>{stage.en}</p>
                          </div>
                          {/* Badges */}

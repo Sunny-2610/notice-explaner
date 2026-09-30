@@ -22,7 +22,7 @@ interface SpeechRecognizer {
 }
 
 function browserLocale(lang: Lang): string {
-  return lang === 'mr' ? 'mr-IN' : 'hi-IN';
+  return lang === 'mr' ? 'mr-IN' : lang === 'en' ? 'en-IN' : 'hi-IN';
 }
 
 function hasSpeechRecognition(): boolean {

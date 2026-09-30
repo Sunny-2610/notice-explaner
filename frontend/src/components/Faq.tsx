@@ -25,6 +25,18 @@ const CONTENT: Record<Lang, { title: string; items: { q: string; a: string }[] }
       { q: 'किती वेळ लागतो?', a: 'एक पानाचे लक्ष्य 15 सेकंदांपेक्षा कमी आहे. कमी विश्वासाची प्रकरणे मानवी पुनरावलोकनात जाऊ शकतात.' },
     ],
   },
+  en: {
+    title: 'Frequently asked questions',
+    items: [
+      { q: 'Which notices are supported?', a: 'Property tax notices, traffic challan/summons, bank recovery notices. Other documents show “not supported yet” (E-201).' },
+      { q: 'What does escalated (serious) mean?', a: 'Only a triage signal — rules like summons, warrant, auction/seizure, or court matched. See a lawyer soon. It is not a verdict.' },
+      { q: 'Is this legal advice?', a: 'No. Every explanation ends with a disclaimer. Certainty about legal outcomes is never claimed.' },
+      { q: 'What happens to my photo?', a: 'The raw image is deleted right after processing. The audit keeps only essential fields and a document hash.' },
+      { q: 'What if voice does not work?', a: 'If it takes over 8 seconds or fails, text continues — the job never stops.' },
+      { q: 'Where does browser-voice audio go?', a: 'When server voice is off and browser recognition runs, audio may be sent to the browser vendor speech service.' },
+      { q: 'How long does it take?', a: 'Target is under 15 seconds for a single page. Low-confidence cases may go to human review.' },
+    ],
+  },
 };
 
 export default function Faq({ lang }: { lang: Lang }) {

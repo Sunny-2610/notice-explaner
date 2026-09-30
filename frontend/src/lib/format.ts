@@ -1,10 +1,11 @@
 /** Locale-aware formatting for notice fields. */
 
-export function formatDate(iso: string, lang: 'hi' | 'mr'): string {
+export function formatDate(iso: string, lang: 'hi' | 'mr' | 'en'): string {
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return iso;
-    return new Intl.DateTimeFormat(lang === 'hi' ? 'hi-IN' : 'mr-IN', {
+    const locale = lang === 'hi' ? 'hi-IN' : lang === 'mr' ? 'mr-IN' : 'en-IN';
+    return new Intl.DateTimeFormat(locale, {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
