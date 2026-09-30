@@ -131,6 +131,10 @@ def process_job(
     if pre.escalate or post.escalate:
         job_store.set_status(job_id, JobStatus.AWAITING_REVIEW, ErrorCode.ESCALATION_SET.value)
         review_queue.enqueue(job_id, ReviewReason.ESCALATION_FLAG_SET)
+        # Provisional-first: explanation is already saved above, so the client
+        # can render it immediately with provisional=true while review pends.
+        audit.log_stage(job_id, "provisional_deliver", {},
+                        {"provisional": True, "reason": "escalation_flag_set"})
         return  # keep image for reviewer context
 
     job_store.set_status(job_id, JobStatus.COMPLETED)
