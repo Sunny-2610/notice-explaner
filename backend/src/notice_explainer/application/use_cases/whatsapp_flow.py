@@ -191,8 +191,8 @@ def handle_message(
     aid = legal_aid or []
     body = (text or "").strip()
 
-    if body in ("1", "2"):
-        prefs[sender_hash] = "hi" if body == "1" else "mr"
+    if body in ("1", "2", "3"):
+        prefs[sender_hash] = {"1": "hi", "2": "mr", "3": "en"}[body]
         channel.send_message(to, t(prefs[sender_hash])["lang_set"])
         return
     if sender_hash not in prefs and sender_hash not in greeted:

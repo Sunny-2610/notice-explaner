@@ -1,7 +1,7 @@
 {
   "_note": "DRAFT strings for the WhatsApp channel — NEEDS NATIVE REVIEW before any pilot.",
   "hi": {
-    "menu": "Yojana Mitra में आपका स्वागत है! भाषा चुनें: 1 = हिंदी, 2 = मराठी",
+    "menu": "Yojana Mitra में आपका स्वागत है! भाषा चुनें: 1 = हिंदी, 2 = मराठी, 3 = English",
     "lang_set": "भाषा हिंदी चुनी गई। कृपया नोटिस की फोटो भेजें (JPG/PNG, 10MB तक)।",
     "send_photo": "कृपया नोटिस की फोटो भेजें (JPG/PNG, 10MB तक)।",
     "rate_limited": "आपने एक घंटे में 10 से अधिक नोटिस भेजे हैं। कृपया बाद में प्रयास करें।",
@@ -18,7 +18,7 @@
     "bad_file": "सही JPG/PNG फोटो (10MB तक) भेजें।"
   },
   "mr": {
-    "menu": "योजना मित्रामध्ये आपले स्वागत आहे! भाषा निवडा: 1 = हिंदी, 2 = मराठी",
+    "menu": "योजना मित्रामध्ये आपले स्वागत आहे! भाषा निवडा: 1 = हिंदी, 2 = मराठी, 3 = English",
     "lang_set": "भाषा मराठी निवडली. कृपया नोटिशीचा फोटो पाठवा (JPG/PNG, 10MB पर्यंत).",
     "send_photo": "कृपया नोटिशीचा फोटो पाठवा (JPG/PNG, 10MB पर्यंत).",
     "rate_limited": "तुम्ही एका तासात 10 पेक्षा जास्त नोटिसी पाठवल्या आहेत. कृपया नंतर प्रयत्न करा.",
@@ -33,5 +33,22 @@
     "legal_aid": "मोफत कायदेशीर मदत: {entries}",
     "still_processing": "अजून तपासणी सुरू आहे. तयार होताच तुम्हाला इथे उत्तर मिळेल.",
     "bad_file": "योग्य JPG/PNG फोटो (10MB पर्यंत) पाठवा."
+  },
+  "en": {
+    "menu": "Welcome to Yojana Mitra! Choose language: 1 = Hindi, 2 = Marathi, 3 = English",
+    "lang_set": "Language set to English. Please send a photo of the notice (JPG/PNG, up to 10MB).",
+    "send_photo": "Please send a photo of the notice (JPG/PNG, up to 10MB).",
+    "rate_limited": "You have sent more than 10 notices in an hour. Please try later.",
+    "verdict_serious": "This notice looks serious.",
+    "verdict_ok": "Details of your notice:",
+    "under_review": "It has been sent for human review. You will get the explanation after review.",
+    "authority_label": "Authority",
+    "amount_label": "Amount",
+    "deadline_label": "Deadline",
+    "action_label": "Action",
+    "checklist_title": "Checklist:",
+    "legal_aid": "Free legal aid: {entries}",
+    "still_processing": "Still processing. You will get the answer here once ready.",
+    "bad_file": "Please send a valid JPG/PNG photo (up to 10MB)."
   }
 }
