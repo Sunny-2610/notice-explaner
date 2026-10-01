@@ -7,6 +7,7 @@ WORKDIR /app
 COPY backend/pyproject.toml ./
 COPY backend/src ./src
 COPY backend/escalation_rules.yaml ./
+COPY backend/data ./data
 # Real Q&A agent included so GEMINI_API_KEY + USE_FAKE_AI=false works.
 RUN pip install --no-cache-dir ".[qa]" httpx redis "psycopg[binary]"
 ENV PYTHONPATH=/app/src USE_FAKE_AI=true

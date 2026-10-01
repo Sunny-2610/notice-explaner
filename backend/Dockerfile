@@ -3,6 +3,7 @@ WORKDIR /app
 COPY pyproject.toml ./
 COPY src ./src
 COPY escalation_rules.yaml ./
+COPY data ./data
 # Real Q&A agent (LangChain) included so GEMINI_API_KEY + USE_FAKE_AI=false works.
 RUN pip install --no-cache-dir ".[qa]" httpx redis "psycopg[binary]"
 ENV PYTHONPATH=/app/src USE_FAKE_AI=true
