@@ -40,7 +40,9 @@ review_queue = MemoryReviewQueue()
 
 # Optional Postgres job/image stores (compose sets DATABASE_URL); memory otherwise.
 # Mirrors the audit try/except pattern: tests keep working with no DATABASE_URL set.
-if os.getenv("DATABASE_URL"):
+# .strip() everywhere: dashboard paste (Render/Vercel) can carry a trailing
+# newline into the value, which psycopg rejects as a malformed conn param.
+if os.getenv("DATABASE_URL", "").strip():
     try:
         from ..infrastructure.postgres import PostgresImageStore, PostgresJobStore
 
@@ -55,7 +57,7 @@ else:
     image_store = MemoryImageStore()
 
 # Optional Postgres audit (compose sets DATABASE_URL); memory otherwise.
-if os.getenv("DATABASE_URL"):
+if os.getenv("DATABASE_URL", "").strip():
     try:
         from ..infrastructure.postgres import PostgresAuditLogger
 

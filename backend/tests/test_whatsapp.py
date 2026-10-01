@@ -81,7 +81,12 @@ def _image_msg() -> dict:
     }
 
 
-def test_webhook_disabled_without_env():
+def test_webhook_disabled_without_env(monkeypatch):
+    # Must clear the 5 vars explicitly: a developer .env (or CI secret) with
+    # real Twilio keys is loaded by main.py's load_dotenv(), which would
+    # otherwise turn this into 403 instead of the 404 we assert.
+    for k in WA_ENV:
+        monkeypatch.delenv(k, raising=False)
     client = _client()
     r = client.post(PATH, data=_text_msg("hello"))
     assert r.status_code == 404

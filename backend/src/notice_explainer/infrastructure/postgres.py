@@ -11,17 +11,6 @@ from __future__ import annotations
 import json
 import os
 import threading
-
-
-def _connect():
-    import psycopg  # type: ignore[import-not-found]
-
-    url = os.getenv("DATABASE_URL", "")
-    if not url:
-        raise RuntimeError("DATABASE_URL not set")
-    return psycopg.connect(url, autocommit=True)
-
-
 DDL = """
 CREATE TABLE IF NOT EXISTS audit_log_entries (
   log_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -42,12 +31,38 @@ CREATE TABLE IF NOT EXISTS job_images (
   created_at TIMESTAMPTZ DEFAULT now());
 """
 
+_SHARED_CONN = None
+_SHARED_LOCK = threading.Lock()
+
+def _connect():
+    import psycopg  # type: ignore[import-not-found]
+    global _SHARED_CONN
+    with _SHARED_LOCK:
+        if _SHARED_CONN is not None and not _SHARED_CONN.closed:
+            try:
+                _SHARED_CONN.execute("SELECT 1")
+                return _SHARED_CONN
+            except psycopg.OperationalError:
+                pass
+        
+        url = os.getenv("DATABASE_URL", "").strip()
+        if not url:
+            raise RuntimeError("DATABASE_URL not set")
+        
+        _SHARED_CONN = psycopg.connect(url, autocommit=True)
+        # Ensure DDL runs on the fresh connection
+        with _SHARED_CONN.cursor() as cur:
+            cur.execute(DDL)
+        return _SHARED_CONN
+
 
 class PostgresAuditLogger:
     def __init__(self) -> None:
-        self._conn = _connect()
-        with self._conn.cursor() as cur:
-            cur.execute(DDL)
+        pass
+
+    @property
+    def _conn(self):
+        return _connect()
 
     def log_stage(self, job_id: str, stage: str, input_ref: dict, output_ref: dict,
                   model_version: str | None = None, prompt_version: str | None = None) -> None:
@@ -162,12 +177,13 @@ class PostgresJobStore:
     """Persisted mirror of MemoryJobStore (single JSONB row per job)."""
 
     def __init__(self) -> None:
-        self._conn = _connect()
         self._lock = threading.Lock()
-        with self._conn.cursor() as cur:
-            cur.execute(DDL)
         self.extractions = _ExtractionsView(self)
         self.explanations = _ExplanationsView(self)
+
+    @property
+    def _conn(self):
+        return _connect()
 
     # -- internal helpers -------------------------------------------------
     def _load_state(self, job_id: str) -> dict | None:
@@ -332,10 +348,11 @@ class PostgresImageStore:
     """Raw upload bytes in a BYTEA table (same put/fetch/delete contract)."""
 
     def __init__(self) -> None:
-        self._conn = _connect()
         self._lock = threading.Lock()
-        with self._conn.cursor() as cur:
-            cur.execute(DDL)
+        
+    @property
+    def _conn(self):
+        return _connect()
 
     def put(self, job_id: str, image: bytes) -> None:
         with self._lock:
