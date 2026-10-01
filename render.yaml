@@ -5,14 +5,28 @@ services:
     plan: free
     rootDir: backend
     # Real Q&A agent (LangChain) needs the qa extra: pip install ".[qa]"
-    buildCommand: pip install .
+    buildCommand: pip install ".[qa]"
     startCommand: PYTHONPATH=src uvicorn notice_explainer.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: USE_FAKE_AI
-        value: "true"
+        value: "false"
       - key: GEMINI_API_KEY
         sync: false
-      - key: BHASHINI_API_KEY
+      - key: DATABASE_URL
+        sync: false
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: WHATSAPP_HASH_SALT
+        sync: false
+      - key: REVIEWER_API_KEY
         sync: false

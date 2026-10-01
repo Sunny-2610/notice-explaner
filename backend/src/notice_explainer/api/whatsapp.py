@@ -8,11 +8,12 @@ from __future__ import annotations
 
 import os
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, Response
 
 from ..application.use_cases.whatsapp_flow import (
     handle_message,
     hash_sender,
+    try_mark_sid,
 )
 from ..infrastructure.twilio_whatsapp import verify_twilio_signature
 from . import deps
@@ -31,7 +32,7 @@ def _configured() -> bool:
 
 
 @router.post("/webhook")
-async def webhook(request: Request) -> Response:
+async def webhook(request: Request, background: BackgroundTasks) -> Response:
     if not _configured():
         raise HTTPException(status_code=404, detail="whatsapp channel disabled")
     form = await request.form()
@@ -43,6 +44,11 @@ async def webhook(request: Request) -> Response:
         os.getenv("TWILIO_AUTH_TOKEN", ""), url, params, signature
     ):
         raise HTTPException(status_code=403, detail="bad signature")
+
+    # Idempotency: Twilio retries on slow/cold responses. Same MessageSid
+    # must never create a second job. Missing Sid (old tests) always processes.
+    if not try_mark_sid(params.get("MessageSid", "")):
+        return Response(status_code=204)
 
     sender = params.get("From", "")
     sender_hash = hash_sender(sender, os.getenv("WHATSAPP_HASH_SALT", ""))
@@ -66,7 +72,12 @@ async def webhook(request: Request) -> Response:
         national = aid_dir.national()
     except Exception:
         national = []
-    handle_message(
+    # Fast-ack: Twilio times out ~15s, Render cold start is ~50s and the
+    # pipeline waits up to 60s. Ack 204 now, process in background; the user
+    # gets still_processing + final reply via _watch_later. TestClient runs
+    # background tasks before returning, so existing tests stay synchronous.
+    background.add_task(
+        handle_message,
         sender_hash=sender_hash,
         to=sender,
         text=body,

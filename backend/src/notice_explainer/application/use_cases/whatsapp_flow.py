@@ -32,6 +32,30 @@ greeted: set[str] = set()
 rate_hits: dict[str, list[float]] = {}
 sender_registry: dict[str, dict] = {}
 
+# Twilio MessageSid dedupe (24h TTL). Prevents duplicate jobs when Twilio
+# retries a webhook after a slow/cold response. In-memory like the rest;
+# Redis port later (Phase-2) without changing callers.
+_seen_sids: dict[str, float] = {}
+_seen_lock = threading.Lock()
+SEEN_TTL_S = 24 * 3600
+
+
+def try_mark_sid(sid: str) -> bool:
+    """Mark a Twilio MessageSid as seen. True=new (process), False=duplicate."""
+    if not sid:
+        return True
+    now = time.time()
+    with _seen_lock:
+        ts = _seen_sids.get(sid)
+        if ts is not None and now - ts < SEEN_TTL_S:
+            return False
+        _seen_sids[sid] = now
+        if len(_seen_sids) > 5000:
+            cutoff = now - SEEN_TTL_S
+            for k in [k for k, v in _seen_sids.items() if v < cutoff]:
+                _seen_sids.pop(k, None)
+        return True
+
 _STRINGS_PATH = Path(__file__).resolve().parents[4] / "data" / "whatsapp_strings.json"
 _strings_cache: dict | None = None
 
