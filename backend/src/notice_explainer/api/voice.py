@@ -73,6 +73,9 @@ async def voice_speech(
         audio = b""
     if not audio:
         return Response(status_code=204)  # text-only fallback (E-302)
+    # Success is audited like every other stage (byte count only, never audio).
+    deps.audit.log_stage(job_id, "voice_speech", {"chars": len(speak)},
+                         {"bytes": len(audio)})
     return Response(content=audio, media_type="audio/mpeg")
 
 
