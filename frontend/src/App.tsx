@@ -19,6 +19,16 @@ import { formatCurrency, formatDate } from './lib/format';
 import { useJobStream as useJobPoll } from './hooks/useJobStream';
 import { STRINGS, type Lang } from './i18n/strings';
 
+// App shell: upload/camera home -> live result -> review/how/faq tabs.
+//
+// Layout contract (keep in sync when editing):
+// - Mobile (<1024px): take-photo + gallery-upload choice grid, then voice.
+//   Two pickers: fileRef (capture="environment", camera-first) and
+//   galleryRef (no capture, OS chooser). Camera-denied fallback opens gallery.
+// - Desktop (>=1024px): upload-first two-column grid (file + drag-drop).
+// - Result: full card renders for completed OR provisional (escalated with
+//   explanation saved); blocked cards only when there is NOTHING truthful
+//   to show (E-201 unsupported, E-150 no-text). See ProvisionalBanner.
 type Tab = 'explain' | 'how' | 'faq' | 'review';
 
 function initialLang(): Lang {

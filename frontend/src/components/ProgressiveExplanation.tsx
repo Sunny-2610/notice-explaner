@@ -2,6 +2,11 @@ import { useMemo, useState } from 'react';
 import { FileText, ArrowRight } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
+// Renders the REAL backend explanation (prop `text`) in three progressive
+// beats. visibleCount reveals ~1/3 of paragraphs per tap so low-literacy
+// readers aren't walled by text; the final beat discloses the AI origin line.
+// (This component was once hardcoded PM-Kisan mock copy — it must never
+// contain document-specific text again; everything comes from `text`.)
 export default function ProgressiveExplanation({ text, lang }: { text: string; lang: Lang }) {
   const [step, setStep] = useState(0);
   const t = STRINGS[lang];

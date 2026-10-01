@@ -16,6 +16,13 @@ const INTERVAL_MS = 1500;
  * stage updates only (never explanation tokens); on EventSource error or
  * unsupported browsers it falls back to polling, keeping the
  * timedOut/"taking longer" state.
+ *
+ * Provisional-first note: a `result` frame with provisional=true (escalated
+ * job) does NOT close the stream — the reviewer resolve later emits a
+ * second, verified frame for the same jobId. Only final frames
+ * (completed/failed, or awaiting_review WITHOUT an explanation) close it.
+ * The polling fallback mirrors this: it keeps polling on provisional jobs
+ * so the verified upgrade arrives even where SSE is unavailable.
  */
 export function useJobStream(jobId: string | null) {
   const [result, setResult] = useState<DocumentResult | null>(null);

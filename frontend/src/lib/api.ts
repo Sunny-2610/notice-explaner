@@ -1,3 +1,9 @@
+// API client + wire types.
+//
+// API_BASE is empty in dev so requests hit the Vite proxy (/api -> 127.0.0.1:8000,
+// see vite.config.ts). In production set VITE_API_BASE to the Render URL.
+// DocumentResult MUST stay in sync with backend api/schemas.py — including the
+// provisional-first trio (provisional/verified/reviewReason).
 const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 
 export interface SubmitResult {

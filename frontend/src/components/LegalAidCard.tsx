@@ -1,3 +1,6 @@
+// Free legal-aid directory card (shown on escalated results).
+// State list + helpline entries come from GET /api/v1/legal-aid; the chosen
+// state persists in localStorage (ym_legal_aid_state). Phone links use tel:.
 import { useEffect, useState } from 'react';
 import { Phone, Scale } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';

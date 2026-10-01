@@ -1,6 +1,10 @@
 import { Volume2, Play } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
+// Text-to-speech player stub for the spoken explanation.
+// NOTE: playback is not wired yet — the button/bar are visual only. Wire to
+// POST /{jobId}/voice-speech (see useVoiceAsk.speakAnswer for the working
+// server-TTS-then-browser-fallback helper) before demoing audio.
 export default function VoicePlayer({ jobId, lang }: { jobId: string; lang: Lang }) {
   return (
     <div className="card-elevated bg-white flex flex-col gap-4">

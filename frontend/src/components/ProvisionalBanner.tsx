@@ -1,3 +1,9 @@
+// Provisional-first status pill, shown above the explanation.
+//
+// Provisional (default): amber "AI summary ready — expert check pending".
+// Warns the user not to act on the AI answer alone; paired with LegalAidCard.
+// Verified: green confirmation rendered after the reviewer resolves and the
+// second SSE/poll frame flips the job to completed.
 import { ShieldCheck, Clock } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 

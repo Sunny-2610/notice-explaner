@@ -1,6 +1,12 @@
 import { Clock, ShieldCheck, AlertCircle, Languages, AlertTriangle } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
+// Live pipeline stepper shown while the job runs. Maps backend JobStatus
+// values onto 5 display stages (queued counts as step -1); the active step
+// spins, done steps check off, pending steps stay grey. Purely presentational
+// — stage names come from the localized STAGES table below, progress is
+// proportional ((activeStep + 0.5) / 5).
+
 const STAGES = [
   { key: 'extracting', icon: 'file', hi: 'नोटिस पढ़ा जा रहा है', en: 'Reading notice scan & text', mr: 'नोटीस वाचली जात आहे' },
   { key: 'classifying', icon: 'file', hi: 'प्रकार पहचाना जा रहा है', en: 'Identifying document category & issuing authority', mr: 'प्रकार ओळखला जात आहे' },

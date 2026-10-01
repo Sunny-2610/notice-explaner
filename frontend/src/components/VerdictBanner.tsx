@@ -1,6 +1,11 @@
 import { CheckCircle2, ShieldCheck } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
+// TODO (manual-test finding): heading + body below are hardcoded Hindi
+// "safe / e-KYC" copy — they ignore `lang` AND `escalated`. An escalated
+// court summons currently reads "no fine or court order", which is
+// dangerously wrong reassurance. Must switch to t.verdictDanger/verdictSafe
+// (+ escalation notice) per language before any user sees escalated results.
 export default function VerdictBanner({ escalated, lang }: { escalated: boolean; lang: Lang }) {
   const t = STRINGS[lang];
   return (

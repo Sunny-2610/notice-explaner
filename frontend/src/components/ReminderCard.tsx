@@ -1,3 +1,6 @@
+// Deadline reminder card: countdown (daysRemaining/overdue from the
+// backend-computed deadline block) + "add to calendar" via the
+// GET /{jobId}/reminder.ics download (VEVENT with 7/3/1-day alarms).
 import { useState } from 'react';
 import { CalendarClock, CalendarPlus } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';

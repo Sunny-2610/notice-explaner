@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Camera, Check, FileText, RotateCcw, X, Landmark, Building2, Scan, CheckCircle2 } from 'lucide-react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
-/** Live camera with document-frame guidance. Falls back to file upload. */
+/** Live camera with document-frame guidance. Falls back to file upload.
+ *
+ * Flow: getUserMedia (rear camera) -> capture to canvas -> preview overlay
+ * with corner guides -> onCapture(File) | retake. If permission is denied,
+ * renders the onFallback path instead (App opens the gallery picker), so
+ * camera problems never dead-end a mobile user. Stream tracks stop on
+ * unmount to release the camera.
+ */
 export default function LiveCamera({
   lang,
   onCapture,

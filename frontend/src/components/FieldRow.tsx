@@ -1,6 +1,11 @@
 import { useState, type ReactNode } from 'react';
 import { STRINGS, type Lang } from '../i18n/strings';
 
+// One extracted field (authority/deadline/amount/...): icon + label + value
+// with a confidence dot (green >=0.85, amber >=0.7, red below). Tapping
+// expands the localized confidence sentence. min-w-0/break-words keep long
+// Devanagari values from pushing the layout off-screen on 320px phones.
+
 function level(confidence: number | null | undefined): 'high' | 'medium' | 'low' {
   if (confidence == null) return 'medium';
   if (confidence >= 0.85) return 'high';

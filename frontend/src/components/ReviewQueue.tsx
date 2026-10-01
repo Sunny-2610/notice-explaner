@@ -1,3 +1,8 @@
+// Reviewer console (human-in-the-loop tail of the pipeline).
+// Lists open cases, shows explanation + audit trail per job, resolves as
+// approve / edit (optional finalText overwrites the explanation) / reject.
+// Resolving flips the user-visible status to completed/failed, which the open
+// SSE/poll stream delivers as the verified second frame.
 import { useEffect, useState } from 'react';
 import { Check, Pencil, RefreshCw, X } from 'lucide-react';
 import { fetchResult, type DocumentResult } from '../lib/api';

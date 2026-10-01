@@ -4,6 +4,10 @@ import { STRINGS, type Lang } from '../i18n/strings';
 import { askQuestion } from '../lib/api';
 import { useVoiceAsk } from '../hooks/useVoiceAsk';
 
+// Follow-up Q&A card. Talks to POST /{jobId}/ask (max 10/job enforced
+// server-side from the audit trail; the counter here is display-only).
+// initialQuestion carries a home-screen voice transcript that auto-submits
+// once, so the mic before upload never leads nowhere.
 const MAX_Q = 10;
 
 export default function FollowUpQA({
