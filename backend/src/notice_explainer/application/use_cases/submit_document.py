@@ -44,6 +44,9 @@ def submit_document(
             ErrorCode.UNSUPPORTED_LANGUAGE,
             f"Supported languages: {', '.join(SUPPORTED_LANGUAGES)}.",
         )
+    # Validation order is deliberate: cheap checks (type/size) reject junk
+    # before we spend a uuid/store write. Every rejection maps to HTTP 400
+    # in api/documents.py — validation never creates a job.
     job_id = f"job_{uuid.uuid4().hex[:12]}"
     job = Job(job_id=job_id, session_id=session_id or "anon", target_language=target_language)
     job_store.create_job(job)

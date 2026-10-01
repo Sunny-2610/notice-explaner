@@ -1,4 +1,11 @@
-"""Review queue endpoints (LLD §2.8 + §4). Reviewer/admin auth comes later."""
+"""Review queue endpoints (LLD §2.8 + §4). Reviewer/admin auth comes later.
+
+Lifecycle newcomers should know: an escalated job sits in awaiting_review
+with its provisional AI answer already delivered. Resolving here flips it to
+completed (approve/edit) or failed (reject). approve/edit with an optional
+finalText overwrites the explanation, which the open SSE stream picks up as
+the second, verified result frame.
+"""
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException

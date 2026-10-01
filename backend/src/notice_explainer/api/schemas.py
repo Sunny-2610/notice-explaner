@@ -1,4 +1,11 @@
-"""LLD §4 response shapes (camelCase on the wire, snake_case in domain)."""
+"""LLD §4 response shapes (camelCase on the wire, snake_case in domain).
+
+DocumentResult is THE contract the frontend renders. provisional/verified/
+reviewReason drive the provisional-first UX: an escalated job returns its AI
+answer immediately (provisional=true, review pending) and flips to
+verified=true once a reviewer approves. Memory and Postgres stores must
+return byte-identical keys (see their get_result docstrings).
+"""
 from __future__ import annotations
 
 from pydantic import BaseModel

@@ -3,6 +3,10 @@
 Demo/dev path runs jobs inline via FastAPI BackgroundTasks. When REDIS_URL
 is set, the API enqueues job ids and this worker dequeues them instead:
   python -m notice_explainer.worker
+
+One process = one job at a time (blocking brpop loop); scale by running
+more worker processes. A crash never loses the audit trail — each stage
+persists idempotently by job_id, so a restarted worker resumes cleanly.
 """
 from __future__ import annotations
 

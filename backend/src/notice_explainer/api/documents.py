@@ -49,6 +49,8 @@ async def submit(
             background.add_task(_run, job.job_id)
     else:
         # No Redis configured (demo/dev path) — run inline.
+        # Either way the client gets 202 immediately and polls/SSEs for
+        # the result; the execution path is invisible to the frontend.
         background.add_task(_run, job.job_id)
     return SubmitResponse(jobId=job.job_id, status="queued")
 

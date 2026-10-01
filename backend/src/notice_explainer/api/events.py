@@ -2,6 +2,15 @@
 
 Polls the job store (never hooks process_job), so this works with the Redis
 worker and Postgres stores while process_job stays frozen.
+
+Streaming protocol (provisional-first delivery):
+  status events  -> every stage change, client refetches the full payload.
+  result events  -> the full DocumentResult. Sent ONCE for final states
+    (completed/failed, or awaiting_review WITHOUT an explanation), but
+    TWICE for provisional states (awaiting_review WITH an E-401
+    explanation): first the AI answer now, later the verified answer after
+    the reviewer resolves. The frontend keeps the stream open on provisional
+    results and swaps the banner on the second frame.
 """
 from __future__ import annotations
 

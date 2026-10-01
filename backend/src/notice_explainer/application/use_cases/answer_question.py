@@ -38,9 +38,15 @@ def answer_question(
     if result is None:
         raise AnswerQuestionError(ErrorCode.INVALID_FILE, "unknown jobId", status_code=404)
 
+    # Gate 1/2: no explanation exists yet (low-extraction E-150 or
+    # unsupported E-201 jobs). There is nothing truthful to discuss, so the
+    # agent never runs. Provisional E-401 jobs DO have an explanation and
+    # fall through to the agent.
     if not result.get("explanation"):
         raise AnswerQuestionError(ErrorCode.INVALID_FILE, "Explanation not ready yet.")
 
+    # Gate 2/2: conversation budget counted from the append-only audit trail
+    # (works identically on memory and Postgres backends).
     if audit is not None:
         asked = sum(1 for e in audit.entries_for(job_id)
                     if getattr(e, "stage_name", "") == QA_AUDIT_STAGE)

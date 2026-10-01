@@ -116,6 +116,10 @@ class QAAgent:
             return f"{REFUSALS.get(target_language, REFUSALS['en'])}\n\n{disclaimer}"
 
         try:
+            # Double safety bound: at most 3 tool calls (budget dict shared by
+            # all tools) AND recursion_limit=12 on the agent loop. Either one
+            # alone could still burn quota on a looping model; together the
+            # worst case is a few cheap calls, then the except below.
             budget: dict = {"used": 0, "max": MAX_TOOL_CALLS, "sources": []}
             tools = [
                 make_search_notice_tool(notice_text, budget),

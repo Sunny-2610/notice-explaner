@@ -24,6 +24,9 @@ from ..domain.types import DocumentType, VISION_REASONING_TIMEOUT_S
 from ..application.prompts import DISCLAIMER_TEXT, ESCALATION_NOTICE
 
 _API = "https://generativelanguage.googleapis.com/v1beta/models"
+# Model pins: read ONCE at import (like deps.py, a restart picks up .env edits).
+# Both names must exist in `GET /v1beta/models` for the current key —
+# retired aliases 404, which _generate below retries once on the fallback.
 _MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 _FALLBACK_MODEL = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-3.1-flash-lite")
 
@@ -146,6 +149,7 @@ class GeminiVisionExtractor:
         ])
         # Vision models rarely return calibrated confidence; 0.85 keeps us
         # above the 0.55 review threshold only when text is non-trivial.
+        # Short/empty transcriptions score 0.40 and route to human review.
         conf = 0.85 if len(text.strip()) > 20 else 0.40
         return ExtractionResult(text=text, confidence=conf, provider=self.provider_name)
 
@@ -228,5 +232,7 @@ class GeminiReasoner:
             + f"End with exactly: '{disclaimer}'\n\nFields: {fields}\n\nOriginal:\n{text[:4000]}")}])
         if disclaimer not in out:
             out = out.rstrip() + f"\n{disclaimer}"
+        # Safety invariant: every explanation carries the not-legal-advice
+        # disclaimer, escalated ones additionally name the lawyer notice.
         return ExplanationResult(explanation_text=out, disclaimer_included=True,
                                  escalation_notice_included=escalated)

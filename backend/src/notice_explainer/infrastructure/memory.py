@@ -73,6 +73,9 @@ class MemoryJobStore:
         return True
 
     def get_result(self, job_id: str) -> dict | None:
+        # NOTE: key set must stay byte-identical to PostgresJobStore.get_result
+        # and api/schemas.py DocumentResult — the frontend and SSE stream read
+        # these exact keys (provisional/verified/reviewReason included).
         job = self.jobs.get(job_id)
         if not job:
             return None

@@ -2,6 +2,13 @@
 
 Lets the vertical slice + frontend run with zero paid spend and no keys.
 Real adapters later implement the same ports.
+
+Newcomers: the byte markers below (EMPTY/SUMMONS/UNSUPPORTED-TEST/LOWCONF)
+are TEST HOOKS — integration tests embed them in fake uploads to drive
+specific branches (review routing, unsupported short-circuit). Real user
+photos always hit the final fallback paragraph (property-tax shaped).
+If you see that paragraph for a real notice, the server is in fake mode:
+check /health aiMode and restart after setting USE_FAKE_AI=false.
 """
 from __future__ import annotations
 

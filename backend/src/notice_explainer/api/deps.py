@@ -5,6 +5,10 @@ Hexagonal: api -> application -> domain. Infrastructure selected by env:
   USE_FAKE_AI=false + GEMINI_API_KEY set -> Gemini vision/reasoning.
   BHASHINI_API_KEY set -> Bhashini voice, else FakeVoiceService.
 Tests force fake by leaving USE_FAKE_AI unset.
+
+IMPORTANT for newcomers: these singletons are chosen ONCE at import time.
+Editing .env afterwards does nothing until the uvicorn/worker process
+restarts. The /health endpoint reports the active mode (aiMode).
 """
 from __future__ import annotations
 
@@ -88,6 +92,10 @@ else:
     import httpx as _httpx
 
     def _is_quota_error(exc: BaseException) -> bool:
+        # Only TRANSIENT free-tier pressure falls back to fake (429/503).
+        # Anything else (400 bad request, 401/403 bad key, 404 unknown model)
+        # is a REAL bug or bad config and must surface as E-301 instead of
+        # silently returning fake-looking data.
         if isinstance(exc, _httpx.HTTPStatusError) and exc.response is not None:
             return exc.response.status_code in (429, 503)
         msg = str(exc).lower()

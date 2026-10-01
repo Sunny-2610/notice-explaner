@@ -1,5 +1,12 @@
 """End-to-end job runner (LLD §5 pseudocode).
 
+Pipeline order (newcomers read this first):
+  extract -> classify -> field extract -> escalation pre-check
+  -> generate explanation -> escalation post-check -> completed,
+  with three early exits to the human review queue (awaiting_review):
+  low extraction confidence (E-150), unsupported/low-confidence
+  classification (E-201), escalation flag (E-401).
+
 Stages are independently retryable: never reprocess a prior successful stage
 on retry — each save_* is idempotent by job_id. Fake/real AI injected via ports.
 """
@@ -55,6 +62,8 @@ def process_job(
     job_store.save_extraction(job_id, extraction)
     audit.log_stage(job_id, "extraction", {"bytes": len(image or b"")},
                     {"confidence": extraction.confidence, "provider": extraction.provider})
+    # Exit 1/3: unreadable scan. Nothing truthful to explain yet, so stop
+    # before classification and keep the image for the reviewer.
     if extraction.confidence < EXTRACTION_CONFIDENCE_THRESHOLD:
         job_store.set_status(job_id, JobStatus.AWAITING_REVIEW, ErrorCode.LOW_EXTRACTION.value)
         review_queue.enqueue(job_id, ReviewReason.LOW_EXTRACTION_CONFIDENCE)
@@ -74,6 +83,8 @@ def process_job(
     audit.log_stage(job_id, "classification", {},
                     {"documentType": classification.document_type.value,
                      "confidence": classification.confidence})
+    # Exit 2/3: out-of-scope or unsure document type. Field extraction is
+    # skipped on purpose — guessing fields for an unknown form would mislead.
     if (classification.document_type == DocumentType.UNSUPPORTED
             or classification.confidence < CLASSIFICATION_CONFIDENCE_THRESHOLD):
         job_store.set_status(job_id, JobStatus.AWAITING_REVIEW, ErrorCode.UNSUPPORTED_DOCUMENT.value)
@@ -121,7 +132,9 @@ def process_job(
                     {"disclaimer": explanation.disclaimer_included,
                      "voiceAvailable": voice_available})
 
-    # 6. Escalation post-check on generated text
+    # Exit 3/3: EITHER deterministic check fired (pre on raw text, post on
+    # generated text). Escalation defaults to True when uncertain — zero false
+    # negatives is the success metric, severity is triage-only metadata.
     post = escalation_eval.evaluate(explanation.explanation_text, EscalationStage.POST_EXPLANATION)
     job_store.save_escalation(job_id, EscalationStage.POST_EXPLANATION, post)
     audit.log_stage(job_id, "escalation_post", {},
@@ -138,4 +151,7 @@ def process_job(
         return  # keep image for reviewer context
 
     job_store.set_status(job_id, JobStatus.COMPLETED)
+    # Privacy invariant: raw pixels are deleted the moment they are no longer
+    # needed. The review path above deliberately skips this so the human
+    # reviewer keeps image context; audit retains fields + hash only.
     image_store.delete(job_id)
