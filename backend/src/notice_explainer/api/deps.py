@@ -3,7 +3,8 @@
 Hexagonal: api -> application -> domain. Infrastructure selected by env:
   USE_FAKE_AI=true (default) -> Fake* adapters, zero keys, zero spend.
   USE_FAKE_AI=false + GEMINI_API_KEY set -> Gemini vision/reasoning.
-  BHASHINI_API_KEY set -> Bhashini voice, else FakeVoiceService.
+  Voice ladder (first set wins): SARVAM_API_KEY -> Sarvam (Saaras/Bulbul),
+    then BHASHINI_API_KEY -> Bhashini, else FakeVoiceService.
 Tests force fake by leaving USE_FAKE_AI unset.
 
 IMPORTANT for newcomers: these singletons are chosen ONCE at import time.
@@ -164,7 +165,17 @@ else:
 # Grounding wrapper (pure re-score, no process_job.py change) for both modes.
 field_extractor = GroundedFieldExtractor(field_extractor)  # type: ignore[assignment]
 
-if os.getenv("BHASHINI_API_KEY") and not USE_FAKE:
+# Voice ladder: Sarvam first, Bhashini second, fake otherwise.
+# Only ONE provider is ever live (no fan-out, no double billing), and the
+# choice is import-time like everything else here — restart to re-pick.
+# Every branch preserves the E-302 contract: provider failures raise, and
+# voice.py maps them to text-only continuation. Voice never fails the job.
+if os.getenv("SARVAM_API_KEY") and not USE_FAKE:
+    from ..infrastructure.sarvam import SarvamVoiceService
+
+    voice_service = SarvamVoiceService()  # type: ignore[assignment]
+    AI_MODE += "+sarvam"
+elif os.getenv("BHASHINI_API_KEY") and not USE_FAKE:
     from ..infrastructure.bhashini import BhashiniVoiceService
 
     voice_service = BhashiniVoiceService()  # type: ignore[assignment]
