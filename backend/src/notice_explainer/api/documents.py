@@ -95,6 +95,7 @@ def ask(job_id: str, body: AskRequest) -> AskResponse:
     try:
         answer = answer_question(
             job_id, body.question,
+            target_language=body.targetLanguage,
             job_store=deps.job_store,
             qa_agent=deps.qa_agent,
             audit=deps.audit,

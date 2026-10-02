@@ -112,7 +112,7 @@ export default function VoiceRecorder({
       {variant === 'hero' && (
         <div className="absolute top-6 inset-x-0 flex justify-center pointer-events-none">
           <span className="bg-primary-light text-primary font-medium text-xs px-4 py-1.5 rounded-full flex items-center gap-2">
-            <Mic size={14} /> तुरंत सहायता / Instant Voice Assistant
+            <Mic size={14} /> {t.voiceHeroTitle}
           </span>
         </div>
       )}
@@ -123,7 +123,7 @@ export default function VoiceRecorder({
               <Mic size={28} />
             </div>
           </div>
-          <h3 className="text-2xl font-bold text-text-primary mb-6">बोलकर पूछें</h3>
+          <h3 className="text-2xl font-bold text-text-primary mb-6">{t.voiceHeroHeading}</h3>
           <div className="flex gap-1 justify-center mb-8 h-4 items-center">
             <div className="w-1.5 h-full bg-primary rounded-full"></div>
             <div className="w-1.5 h-1/2 bg-primary/70 rounded-full"></div>
@@ -135,9 +135,9 @@ export default function VoiceRecorder({
 
           <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 w-full mb-6">
             <p className="text-xs font-semibold text-text-primary flex items-center gap-2 mb-2">
-              <MessageCircle size={14} className="text-primary" /> आप ऐसा पूछ सकते हैं:
+              <MessageCircle size={14} className="text-primary" /> {t.voiceHeroExamplesMsg}
             </p>
-            <p className="text-sm text-text-secondary italic">"मुझे राशन कार्ड का नोटिस मिला है, क्या करना चाहिए?"<br />"किसान योजना की स्थिति बताएं"</p>
+            <p className="text-sm text-text-secondary italic">{t.voiceHeroExample1}<br />{t.voiceHeroExample2}</p>
           </div>
         </>
       ) : (
@@ -175,10 +175,10 @@ export default function VoiceRecorder({
             style={{ touchAction: 'pan-y' }}
             className={`btn-primary w-full shadow-lg shadow-primary/20 flex justify-center items-center gap-2 text-base ${variant === 'hero' ? 'bg-primary-light !text-primary hover:bg-primary hover:!text-white' : 'mt-3'}`}
           >
-            <Mic size={20} /> बोलने के लिए दबाकर रखें (Hold to Speak)
+            <Mic size={20} /> {t.voiceHoldLabel}
           </button>
           {variant === 'hero' && (
-            <p className="mt-4 text-xs text-text-muted">हिंदी • मराठी • English सपोर्ट उपलब्ध</p>
+            <p className="mt-4 text-xs text-text-muted">{t.voiceHeroSupportText}</p>
           )}
         </>
       )}

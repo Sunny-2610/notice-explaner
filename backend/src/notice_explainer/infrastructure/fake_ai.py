@@ -113,10 +113,13 @@ class FakeExplanationGenerator:
 
 class FakeVoiceService:
     def speech_to_text(self, audio: bytes, lang: str) -> str:
-        return ""
+        # Mock transcript for local UI testing. Non-empty string ensures voice mode activates.
+        return "मुझे इस नोटिस के बारे में और जानकारी चाहिए (This is a mock voice query)."
 
     def text_to_speech(self, text: str, lang: str) -> bytes:
-        return b""
+        # Dummy 1-byte response to simulate TTS availability without actually synthesizing.
+        # Returning b"" would intentionally trigger E-302, stopping the frontend fallback audio.
+        return b"\x00"
 
 
 class FakeQAAgent:

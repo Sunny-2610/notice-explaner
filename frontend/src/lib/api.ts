@@ -65,11 +65,11 @@ export async function fetchResult(jobId: string): Promise<DocumentResult> {
   return res.json();
 }
 
-export async function askQuestion(jobId: string, question: string): Promise<{ answer: string }> {
+export async function askQuestion(jobId: string, question: string, targetLanguage?: string): Promise<{ answer: string }> {
   const res = await fetch(`${API_BASE}/api/v1/documents/${jobId}/ask`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, targetLanguage }),
   });
   if (!res.ok) throw new Error(`Ask failed (${res.status})`);
   return res.json();

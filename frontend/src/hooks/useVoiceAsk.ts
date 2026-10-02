@@ -150,7 +150,7 @@ export function useVoiceAsk(jobId: string | null, lang: Lang) {
           resolve(last[0].transcript);
         };
         rec.onerror = () => reject(new Error('recognition failed'));
-        rec.onend = () => {};
+        rec.onend = () => { };
         rec.start();
         // Stop after 8s so the mic never hangs open.
         setTimeout(() => {
@@ -162,7 +162,7 @@ export function useVoiceAsk(jobId: string | null, lang: Lang) {
         }, 8000);
       });
       setTranscript(text);
-      const r = await askQuestion(jobId, text);
+      const r = await askQuestion(jobId, text, lang);
       return { transcription: text, answer: r.answer };
     } catch (e) {
       setError((e as Error).message);

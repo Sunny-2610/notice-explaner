@@ -55,16 +55,46 @@ class _StubVoice:
         return self.tts_audio
 
 
-def test_voice_query_empty_transcript_is_unavailable():
-    """FakeVoiceService returns '' -> E-302 fallback, not voiceAvailable true."""
+def test_voice_query_empty_transcript_is_unavailable(monkeypatch):
+    """Empty STT -> E-302 text-only fallback, not voiceAvailable true."""
     c = _client()
     job_id, _ = _completed_job(c)
+    monkeypatch.setattr(deps, "voice_service", _StubVoice(transcript=""))
     r = c.post(f"/api/v1/documents/{job_id}/voice-query",
                files={"audio": ("q.webm", io.BytesIO(b"fake-audio"), "audio/webm")},
                data={"lang": "hi"})
     assert r.status_code == 200
     body = r.json()
     assert body["jobId"] == job_id
+    assert body["voiceAvailable"] is False
+    assert body["code"] == "E-302"
+
+
+def test_voice_query_whitespace_transcript_is_unavailable(monkeypatch):
+    c = _client()
+    job_id, _ = _completed_job(c)
+    monkeypatch.setattr(deps, "voice_service", _StubVoice(transcript="   "))
+    r = c.post(f"/api/v1/documents/{job_id}/voice-query",
+               files={"audio": ("q.webm", io.BytesIO(b"fake-audio"), "audio/webm")},
+               data={"lang": "hi"})
+    assert r.json()["voiceAvailable"] is False
+
+
+def test_voice_query_raises_falls_back(monkeypatch):
+    """A raising voice service must not fail the job (invariant: never fail)."""
+    c = _client()
+    job_id, _ = _completed_job(c)
+
+    class _BrokenVoice:
+        def speech_to_text(self, audio, lang):
+            raise RuntimeError("ASR timeout")
+
+    monkeypatch.setattr(deps, "voice_service", _BrokenVoice())
+    r = c.post(f"/api/v1/documents/{job_id}/voice-query",
+               files={"audio": ("q.webm", io.BytesIO(b"fake-audio"), "audio/webm")},
+               data={"lang": "hi"})
+    assert r.status_code == 200
+    body = r.json()
     assert body["voiceAvailable"] is False
     assert body["code"] == "E-302"
 
@@ -82,11 +112,26 @@ def test_voice_query_happy_path_with_stub(monkeypatch):
     assert body["voiceAvailable"] is True
 
 
-def test_voice_speech_fake_returns_204_text_only():
+def test_voice_speech_empty_audio_returns_204_text_only(monkeypatch):
     c = _client()
     job_id, _ = _completed_job(c)
+    monkeypatch.setattr(deps, "voice_service", _StubVoice(audio=b""))
     r = c.post(f"/api/v1/documents/{job_id}/voice-speech", data={"lang": "hi"})
-    assert r.status_code == 204  # FakeVoiceService has no audio: E-302 fallback
+    assert r.status_code == 204  # empty TTS -> E-302 text-only fallback
+
+
+def test_voice_speech_raises_falls_back_204(monkeypatch):
+    """A raising TTS service must degrade to text-only, never 500."""
+    c = _client()
+    job_id, _ = _completed_job(c)
+
+    class _BrokenVoice:
+        def text_to_speech(self, text, lang):
+            raise TimeoutError("TTS timeout")
+
+    monkeypatch.setattr(deps, "voice_service", _BrokenVoice())
+    r = c.post(f"/api/v1/documents/{job_id}/voice-speech", data={"lang": "hi"})
+    assert r.status_code == 204
 
 
 def test_voice_speech_custom_text_spoken(monkeypatch):

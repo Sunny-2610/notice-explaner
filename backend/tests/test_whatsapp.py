@@ -45,6 +45,7 @@ def _client(media: bytes = b"FAKE-JPEG-PROPERTY-TAX"):
     flow.greeted.clear()
     flow.rate_hits.clear()
     flow.sender_registry.clear()
+    flow._seen_sids.clear()
     return TestClient(create_app())
 
 
@@ -109,6 +110,61 @@ def test_language_menu_then_choice(monkeypatch):
     assert "हिंदी" in deps.messaging_channel.sent[-1]["body"]
     assert _post(client, _text_msg("2")).status_code == 204
     assert "मराठी" in deps.messaging_channel.sent[-1]["body"]
+
+
+def _image_msg_sid(sid: str) -> dict:
+    return {**_image_msg(), "MessageSid": sid}
+
+
+def test_duplicate_message_sid_is_ignored(monkeypatch):
+    # Twilio retries a webhook when the response is slow or the instance is
+    # cold. The same MessageSid must never create a second job.
+    _enable_wa(monkeypatch)
+    client = _client()
+    _post(client, _text_msg("1"))
+    sid = "SM" + "0" * 32
+    assert _post(client, _image_msg_sid(sid)).status_code == 204
+    assert len(deps.messaging_channel.sent) > 0
+    first_count = len(deps.messaging_channel.sent)
+    assert _post(client, _image_msg_sid(sid)).status_code == 204
+    # Retried delivery: acknowledged, but no second explanation sent.
+    assert len(deps.messaging_channel.sent) == first_count
+
+
+def test_distinct_message_sids_both_processed(monkeypatch):
+    _enable_wa(monkeypatch)
+    client = _client()
+    _post(client, _text_msg("1"))
+    before = len(deps.messaging_channel.sent)
+    assert _post(client, _image_msg_sid("SM" + "1" * 32)).status_code == 204
+    after_first = len(deps.messaging_channel.sent)
+    assert _post(client, _image_msg_sid("SM" + "2" * 32)).status_code == 204
+    assert len(deps.messaging_channel.sent) > after_first
+
+
+def test_sid_reprocessed_after_ttl(monkeypatch):
+    # Dedup is time-boxed; after the TTL the same sid is treated as new.
+    from notice_explainer.application.use_cases import whatsapp_flow as flow
+
+    _enable_wa(monkeypatch)
+    client = _client()
+    _post(client, _text_msg("1"))
+    sid = "SM" + "3" * 32
+    assert _post(client, _image_msg_sid(sid)).status_code == 204
+    flow._seen_sids[sid] -= flow.SEEN_TTL_S + 1
+    before = len(deps.messaging_channel.sent)
+    assert _post(client, _image_msg_sid(sid)).status_code == 204
+    assert len(deps.messaging_channel.sent) > before
+
+
+def test_missing_sid_is_always_processed(monkeypatch):
+    # Payloads without a MessageSid must not be silently dropped.
+    _enable_wa(monkeypatch)
+    client = _client()
+    _post(client, _text_msg("1"))
+    before = len(deps.messaging_channel.sent)
+    assert _post(client, _image_msg()).status_code == 204
+    assert len(deps.messaging_channel.sent) > before
 
 
 def test_image_happy_path_replies_verdict_and_facts(monkeypatch):

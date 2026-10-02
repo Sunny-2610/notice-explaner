@@ -35,7 +35,7 @@ export default function FollowUpQA({
     setBusy(true);
     setError(null);
     try {
-      const r = await askQuestion(jobId, q);
+      const r = await askQuestion(jobId, q, lang);
       setItems((prev) => [...prev, { q, a: r.answer }]);
       setInput('');
     } catch (e) {

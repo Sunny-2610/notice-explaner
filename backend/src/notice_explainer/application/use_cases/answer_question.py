@@ -27,6 +27,7 @@ def answer_question(
     job_id: str,
     question: str,
     *,
+    target_language: str | None = None,
     job_store,
     qa_agent,
     audit=None,
@@ -58,10 +59,12 @@ def answer_question(
     extraction = job_store.extractions.get(job_id)
     notice_text = extraction.text if extraction else ""
 
+    override_lang = target_language if target_language else result.get("targetLanguage", "hi")
+
     answer = qa_agent.answer(
         notice_text=notice_text,
         explanation=result["explanation"],
-        target_language=result.get("targetLanguage", "hi"),
+        target_language=override_lang,
         question=question.strip(),
     )
 

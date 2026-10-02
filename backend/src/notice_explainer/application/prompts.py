@@ -29,9 +29,11 @@ ESCALATION_NOTICE = {
 
 def render_system_prompt(target_language: str) -> tuple[str, str]:
     disclaimer = DISCLAIMER_TEXT.get(target_language, DISCLAIMER_TEXT["en"])
+    language_names = {"hi": "Hindi", "mr": "Marathi", "en": "English"}
+    lang_name = language_names.get(target_language, "English")
     return (
         SYSTEM_PROMPT_TEMPLATE.format(
-            target_language=target_language, disclaimer_text=disclaimer
+            target_language=lang_name, disclaimer_text=disclaimer
         ),
         disclaimer,
     )

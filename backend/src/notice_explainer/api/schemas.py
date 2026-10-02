@@ -67,6 +67,7 @@ class ReviewItem(BaseModel):
 
 class AskRequest(BaseModel):
     question: str
+    targetLanguage: str | None = None
 
 
 class AskResponse(BaseModel):

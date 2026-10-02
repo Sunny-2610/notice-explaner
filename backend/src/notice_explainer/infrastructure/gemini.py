@@ -224,8 +224,10 @@ class GeminiReasoner:
                  target_language: str, escalated: bool) -> ExplanationResult:
         disclaimer = DISCLAIMER_TEXT.get(target_language, DISCLAIMER_TEXT["en"])
         notice = ESCALATION_NOTICE.get(target_language, ESCALATION_NOTICE["en"])
+        language_names = {"hi": "Hindi", "mr": "Marathi", "en": "English"}
+        lang_name = language_names.get(target_language, "English")
         out = _generate([{"text": (
-            f"Explain this {document_type.value} in plain everyday {target_language} "
+            f"Explain this {document_type.value} in plain everyday {lang_name} "
             f"(not a lawyer; never claim certainty). Cover: 1) what it is "
             f"2) deadline/action 3) what happens if ignored. "
             + (f"4) {notice} " if escalated else "")

@@ -132,8 +132,10 @@ class QAAgent:
                 tools=tools,
                 system_prompt=SYSTEM_PROMPT,
             )
+            language_names = {"hi": "Hindi", "mr": "Marathi", "en": "English"}
+            lang_name = language_names.get(target_language, "English")
             result = agent.invoke(
-                {"messages": [("user", f"[{target_language}] {question}")]},
+                {"messages": [("user", f"[{lang_name}] {question}")]},
                 config={"recursion_limit": 12},
             )
             answer = _content_to_text(result["messages"][-1].content)
